@@ -9,13 +9,20 @@ import http from "http";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import resolvers from "./graphql/resolvers/index.js";
 import typeDefs from "./graphql/typeDefs/index.js";
+import * as dotenv from "dotenv";
 
 const { json } = pkg;
+dotenv.config();
 
 interface MyContext {
   token?: String;
 }
 const schema = makeExecutableSchema({ typeDefs, resolvers });
+
+const corsOptions = {
+  origin: process.env.CLIENT_ORIGIN_URL,
+  credentials: true,
+};
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -26,7 +33,7 @@ const server = new ApolloServer<MyContext>({
 await server.start();
 app.use(
   "/graphql",
-  cors<cors.CorsRequest>(),
+  cors<cors.CorsRequest>(corsOptions),
   json(),
   expressMiddleware(server, {
     context: async ({ req }) => ({ token: req.headers.token }),
