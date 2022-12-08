@@ -1,12 +1,13 @@
 // v.4 doesn't depend on gql anymore
 const userTypeDefs = `#graphql
+  
+  type Query {
+    searchUsers(username: String): [User]
+  }
+
   type User {
     id: String
     username: String
-  }
-
-  type Query {
-    searchUsers(username: String): [User]
   }
 
   type Mutation {

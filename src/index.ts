@@ -15,7 +15,7 @@ const { json } = pkg;
 interface MyContext {
   token?: String;
 }
-console.log("burek");
+console.log("burekk");
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const app = express();
