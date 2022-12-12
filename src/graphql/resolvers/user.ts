@@ -23,7 +23,7 @@ const userResolvers = {
           error: "Not authorized",
         };
       }
-      const { id: userId } = session.user;
+      const { id: userId } = session.user as User;
 
       try {
         // check that username is available
@@ -31,31 +31,27 @@ const userResolvers = {
           where: { username },
         });
         if (existingUser) {
-          console.log("username already exists");
           return {
             error: "Username already taken. Try another",
           };
         }
-        // await prisma.user.update({ data: { username }, where: { id: userId } });
+
         const user = await prisma.user.update({
           where: { id: userId },
           data: { username },
         });
         if (user) {
-          console.log("user", JSON.stringify(user));
           return { success: true };
         }
 
         // update user
       } catch (error: any) {
-        console.log("createUsername error: ", error);
         return {
           error: error?.message,
         };
       }
     },
   },
-  // Subscription: {},
 };
 
 export default userResolvers;

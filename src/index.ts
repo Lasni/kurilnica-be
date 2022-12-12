@@ -11,10 +11,7 @@ import resolvers from "./graphql/resolvers/index.js";
 import typeDefs from "./graphql/typeDefs/index.js";
 import * as dotenv from "dotenv";
 import { getSession } from "next-auth/react";
-import {
-  GraphQLContextInterface,
-  SessionInterface,
-} from "./interfaces/graphqlInterfaces";
+import { GraphQLContextInterface } from "./interfaces/graphqlInterfaces";
 import { PrismaClient } from "@prisma/client";
 import { Session } from "next-auth";
 
@@ -51,7 +48,7 @@ app.use(
   json(),
   expressMiddleware(server, {
     context: async ({ req, res }): Promise<GraphQLContextInterface> => {
-      const session = (await getSession({ req })) as SessionInterface;
+      const session = await getSession({ req });
       return {
         // token: req.headers.token,
         session,

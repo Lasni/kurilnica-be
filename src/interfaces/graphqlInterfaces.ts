@@ -2,7 +2,7 @@ import { ISODateString, Session } from "next-auth";
 import { PrismaClient } from "@prisma/client";
 
 export interface GraphQLContextInterface {
-  session: SessionInterface | null; // next-auth session
+  session: Session | null; // next-auth session
   prisma: PrismaClient; // prisma client
   // pubsub: // pubsub module
 }
@@ -10,19 +10,19 @@ export interface GraphQLContextInterface {
 /**
  * Users
  */
-export interface SessionInterface {
-  user: UserInterface;
-  expires: ISODateString;
-}
+// export interface SessionInterface {
+//   user: UserInterface;
+//   expires: ISODateString;
+// }
 
-export interface UserInterface {
-  id: string;
-  username: string;
-  email: string;
-  emailVerified: boolean;
-  image: string;
-  name: string;
-}
+// export interface UserInterface {
+//   id: string;
+//   username: string;
+//   email: string;
+//   emailVerified: boolean;
+//   image: string;
+//   name: string;
+// }
 
 export interface CreateUsernameResponseInterface {
   success?: boolean;
