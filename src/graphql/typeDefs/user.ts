@@ -2,10 +2,10 @@
 const userTypeDefs = `#graphql
   
   type Query {
-    searchUsers(username: String): [User]
+    searchUsers(username: String): [SearchedUser]
   }
 
-  type User {
+  type SearchedUser {
     id: String
     username: String
   }

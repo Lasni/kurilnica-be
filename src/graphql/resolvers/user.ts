@@ -1,12 +1,46 @@
 import { User } from "next-auth";
+import { CustomUserInterface } from "../../interfaces/graphqlInterfaces";
+import { SearchedUser } from "../../../../frontend/src/interfaces/graphqlInterfaces";
 import {
   CreateUsernameResponseInterface,
   GraphQLContextInterface,
+  SearchUsersResponseInterface,
 } from "../../interfaces/graphqlInterfaces";
 
 const userResolvers = {
   Query: {
-    searchUsers: () => {},
+    searchUsers: async (
+      parent: any,
+      args: { username: string },
+      contextValue: GraphQLContextInterface,
+      info: any
+    ): Promise<Array<User>> => {
+      console.log("inside search users");
+      const { username: searchedUsername } = args;
+      const { prisma, session } = contextValue;
+
+      if (!session?.user) {
+        throw new Error("Not authorized");
+        //apolloerror?
+      }
+
+      const { username: signedInUsername } = session.user;
+
+      try {
+        const users = await prisma.user.findMany({
+          where: {
+            username: {
+              contains: searchedUsername,
+              not: signedInUsername,
+              mode: "insensitive",
+            },
+          },
+        });
+        return users;
+      } catch (error: any) {
+        throw new Error(error?.message);
+      }
+    },
   },
   Mutation: {
     createUsername: async (
@@ -23,7 +57,7 @@ const userResolvers = {
           error: "Not authorized",
         };
       }
-      const { id: userId } = session.user as User;
+      const { id: userId } = session.user;
 
       try {
         // check that username is available
