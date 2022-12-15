@@ -6,6 +6,7 @@ import {
   GraphQLContextInterface,
   SearchUsersResponseInterface,
 } from "../../interfaces/graphqlInterfaces";
+import { GraphQLError } from "graphql";
 
 const userResolvers = {
   Query: {
@@ -15,13 +16,13 @@ const userResolvers = {
       contextValue: GraphQLContextInterface,
       info: any
     ): Promise<Array<User>> => {
-      console.log("inside search users");
       const { username: searchedUsername } = args;
       const { prisma, session } = contextValue;
 
       if (!session?.user) {
-        throw new Error("Not authorized");
-        //apolloerror?
+        // throw new Error("Not authorized");
+        // ApolloError is now GraphQLError
+        throw new GraphQLError("Not Authorized");
       }
 
       const { username: signedInUsername } = session.user;
@@ -39,7 +40,8 @@ const userResolvers = {
         console.log("users: ", users);
         return users;
       } catch (error: any) {
-        throw new Error(error?.message);
+        // throw new Error(error?.message);
+        throw new GraphQLError(error?.message);
       }
     },
   },
