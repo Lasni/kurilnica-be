@@ -20,8 +20,6 @@ const userResolvers = {
       const { prisma, session } = contextValue;
 
       if (!session?.user) {
-        // throw new Error("Not authorized");
-        // ApolloError is now GraphQLError
         throw new GraphQLError("Not Authorized");
       }
 
@@ -40,7 +38,6 @@ const userResolvers = {
         console.log("users: ", users);
         return users;
       } catch (error: any) {
-        // throw new Error(error?.message);
         throw new GraphQLError(error?.message);
       }
     },

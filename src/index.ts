@@ -7,16 +7,15 @@ import express from "express";
 import http from "http";
 
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import resolvers from "./graphql/resolvers/index.js";
-import typeDefs from "./graphql/typeDefs/index.js";
+import { PrismaClient } from "@prisma/client";
 import * as dotenv from "dotenv";
 import { getSession } from "next-auth/react";
+import resolvers from "./graphql/resolvers/index.js";
+import typeDefs from "./graphql/typeDefs/index.js";
 import {
-  GraphQLContextInterface,
   CustomSessionInterface,
+  GraphQLContextInterface,
 } from "./interfaces/graphqlInterfaces";
-import { PrismaClient } from "@prisma/client";
-import { Session } from "next-auth";
 
 const { json } = pkg;
 dotenv.config();
