@@ -34,8 +34,6 @@ const conversationResolvers = {
           include: conversationValidated, // stuff that we want returned on our conversation object
         });
 
-        console.log("conversation: ", conversation);
-
         // emmit CONVERSATION_CREATED event using pubsub
         return {
           conversationId: conversation.id,
