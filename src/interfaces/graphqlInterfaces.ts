@@ -1,5 +1,9 @@
 import { ISODateString, Session, User } from "next-auth";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
+import {
+  conversationValidated,
+  participantValidated,
+} from "../graphql/resolvers/conversation";
 
 export interface GraphQLContextInterface {
   session: CustomSessionInterface | null; // next-auth session
@@ -32,3 +36,15 @@ export interface CreateUsernameResponseInterface {
 export interface SearchUsersResponseInterface {
   searchUsers: Array<Pick<CustomUserInterface, "id" | "username">>;
 }
+
+/**
+ * Conversations
+ */
+
+export type ConversationPopulated = Prisma.ConversationGetPayload<{
+  include: typeof conversationValidated;
+}>;
+
+export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
+  include: typeof participantValidated;
+}>;

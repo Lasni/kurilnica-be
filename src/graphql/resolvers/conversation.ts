@@ -1,9 +1,46 @@
-import { GraphQLContextInterface } from "../../interfaces/graphqlInterfaces";
+import {
+  GraphQLContextInterface,
+  ConversationPopulated,
+} from "../../interfaces/graphqlInterfaces";
 import { GraphQLError } from "graphql";
 import { Prisma } from "@prisma/client";
 
 const conversationResolvers = {
-  // Query: {},
+  Query: {
+    conversations: async (
+      parent: any,
+      args: any,
+      contextValue: GraphQLContextInterface,
+      info: any
+    ): Promise<Array<ConversationPopulated>> => {
+      const { session, prisma } = contextValue;
+      if (!session?.user) {
+        throw new GraphQLError(`Not authorized`);
+      }
+      const {
+        user: { id: userId },
+      } = session;
+
+      try {
+        const conversations = await prisma.conversation.findMany({
+          where: {
+            participants: {
+              some: {
+                userId: {
+                  equals: userId,
+                },
+              },
+            },
+          },
+          include: conversationValidated,
+        });
+        console.log("conversations:", conversations);
+        return conversations;
+      } catch (error: any) {
+        throw new GraphQLError(`Error: ${error?.message}`);
+      }
+    },
+  },
   Mutation: {
     createConversation: async (
       parent: any,
@@ -19,7 +56,6 @@ const conversationResolvers = {
       const { id: userId } = session.user;
 
       try {
-        console.log("participantIds:", participantIds);
         const conversation = await prisma.conversation.create({
           data: {
             participants: {
