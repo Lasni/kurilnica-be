@@ -18,12 +18,17 @@ const conversationTypeDefs = `#graphql
     participants: [Participant]
     createdAt: Date
     updatedAt: Date
+
   }
 
   type Participant {
     id: String
     user: User
     hasSeenLatestMessage: Boolean
+  }
+
+  type Subscription {
+    conversationCreated: Conversation
   }
 `;
 

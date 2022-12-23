@@ -1,9 +1,10 @@
-import {
-  GraphQLContextInterface,
-  ConversationPopulated,
-} from "../../interfaces/graphqlInterfaces";
-import { GraphQLError } from "graphql";
 import { Prisma } from "@prisma/client";
+import { GraphQLError } from "graphql";
+import { ConversationEnum } from "../../enums/graphqlEnums";
+import {
+  ConversationPopulated,
+  GraphQLContextInterface,
+} from "../../interfaces/graphqlInterfaces";
 
 const conversationResolvers = {
   Query: {
@@ -48,7 +49,7 @@ const conversationResolvers = {
       info: any
     ): Promise<{ conversationId: string }> => {
       const { participantIds } = args;
-      const { prisma, session } = contextValue;
+      const { prisma, session, pubsub } = contextValue;
       if (!session?.user) {
         throw new GraphQLError("Not authorized");
       }
@@ -70,6 +71,10 @@ const conversationResolvers = {
         });
 
         // emmit CONVERSATION_CREATED event using pubsub
+        pubsub.publish(ConversationEnum.CONVERSATION_CREATED, {
+          conversationCreated: conversation,
+        });
+
         return {
           conversationId: conversation.id,
         };
@@ -78,7 +83,19 @@ const conversationResolvers = {
       }
     },
   },
-  // Subscription: {}
+  Subscription: {
+    conversationCreated: {
+      subscribe: (
+        parent: any,
+        args: any,
+        contextValue: GraphQLContextInterface,
+        info: any
+      ) => {
+        const { pubsub } = contextValue;
+        return pubsub.asyncIterator([ConversationEnum.CONVERSATION_CREATED]);
+      },
+    },
+  },
 };
 
 export const participantValidated =
