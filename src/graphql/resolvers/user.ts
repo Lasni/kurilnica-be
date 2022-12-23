@@ -35,7 +35,6 @@ const userResolvers = {
             },
           },
         });
-        console.log("users: ", users);
         return users;
       } catch (error: any) {
         throw new GraphQLError(error?.message);

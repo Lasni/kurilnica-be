@@ -34,7 +34,6 @@ const conversationResolvers = {
           },
           include: conversationValidated,
         });
-        console.log("conversations:", conversations);
         return conversations;
       } catch (error: any) {
         throw new GraphQLError(`Error: ${error?.message}`);
