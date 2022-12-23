@@ -1,20 +1,23 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import pkg from "body-parser";
-import cors from "cors";
-import express from "express";
-import http from "http";
-
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { PrismaClient } from "@prisma/client";
+import pkg from "body-parser";
+import cors from "cors";
 import * as dotenv from "dotenv";
+import express from "express";
+import { PubSub } from "graphql-subscriptions";
+import { useServer } from "graphql-ws/lib/use/ws";
+import { createServer } from "http";
 import { getSession } from "next-auth/react";
+import { WebSocketServer } from "ws";
 import resolvers from "./graphql/resolvers/index.js";
 import typeDefs from "./graphql/typeDefs/index.js";
 import {
   CustomSessionInterface,
   GraphQLContextInterface,
+  SubscriptionContextInterface,
 } from "./interfaces/graphqlInterfaces";
 
 const { json } = pkg;
@@ -23,7 +26,6 @@ dotenv.config();
 interface MyContext {
   token?: String;
 }
-const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const corsOptions = {
   origin: process.env.CLIENT_ORIGIN_URL,
@@ -36,11 +38,60 @@ const corsOptions = {
 const prisma = new PrismaClient();
 
 const app = express();
-const httpServer = http.createServer(app);
+
+// This `app` is the returned value from `express()`.
+const httpServer = createServer(app);
+
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
 const server = new ApolloServer<MyContext>({
   schema,
-  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+  plugins: [
+    // Proper shutdown for the HTTP server.
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+
+    // Proper shutdown for the WebSocket server.
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose();
+          },
+        };
+      },
+    },
+  ],
 });
+
+// Creating the WebSocket server
+const wsServer = new WebSocketServer({
+  // This is the `httpServer` we created in a previous step.
+  server: httpServer,
+  // Pass a different path here if app.use
+  // serves expressMiddleware at a different path
+  path: "/graphql/subscriptions",
+});
+
+const pubsub = new PubSub();
+
+// Hand in the schema we just created and have the
+// WebSocketServer start listening.
+const serverCleanup = useServer(
+  {
+    schema,
+    context: async (
+      ctx: SubscriptionContextInterface
+    ): Promise<GraphQLContextInterface> => {
+      if (ctx.connectionParams && ctx.connectionParams.session) {
+        const { session } = ctx.connectionParams;
+
+        return { session, prisma, pubsub };
+      }
+      return { session: null, prisma, pubsub };
+    },
+  },
+  wsServer
+);
 
 await server.start();
 
@@ -55,6 +106,7 @@ app.use(
         // token: req.headers.token,
         session,
         prisma,
+        pubsub,
       };
     },
   })

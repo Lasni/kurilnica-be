@@ -4,20 +4,33 @@ import {
   conversationValidated,
   participantValidated,
 } from "../graphql/resolvers/conversation";
+import { Context } from "graphql-ws";
+import { PubSub } from "graphql-subscriptions";
+
+/**
+ * Server config
+ */
+
+export interface SubscriptionContextInterface extends Context {
+  connectionParams: {
+    session?: CustomSessionInterface;
+  };
+}
 
 export interface GraphQLContextInterface {
   session: CustomSessionInterface | null; // next-auth session
   prisma: PrismaClient; // prisma client
-  // pubsub: // pubsub module
+  pubsub: PubSub; // pubsub module
+}
+
+export interface CustomSessionInterface {
+  user: CustomUserInterface;
+  expires: ISODateString;
 }
 
 /**
  * Users
  */
-export interface CustomSessionInterface {
-  user: CustomUserInterface;
-  expires: ISODateString;
-}
 
 export interface CustomUserInterface {
   id: string;
