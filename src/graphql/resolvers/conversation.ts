@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { GraphQLError } from "graphql";
+import { withFilter } from "graphql-subscriptions";
 import { ConversationEnum } from "../../enums/graphqlEnums";
 import {
   ConversationPopulated,
@@ -85,18 +86,41 @@ const conversationResolvers = {
   },
   Subscription: {
     conversationCreated: {
-      subscribe: (
-        parent: any,
-        args: any,
-        contextValue: GraphQLContextInterface,
-        info: any
-      ) => {
-        const { pubsub } = contextValue;
-        return pubsub.asyncIterator([ConversationEnum.CONVERSATION_CREATED]);
-      },
+      subscribe: withFilter(
+        (
+          parent: any,
+          args: any,
+          contextValue: GraphQLContextInterface,
+          info: any
+        ) => {
+          const { pubsub } = contextValue;
+          return pubsub.asyncIterator([ConversationEnum.CONVERSATION_CREATED]);
+        },
+        (
+          payload: ConversationCreatedSubscriptionPayloadInterface,
+          variables,
+          context: GraphQLContextInterface
+        ) => {
+          const { session } = context;
+          const {
+            conversationCreated: { participants },
+          } = payload;
+
+          // cast to boolean with !!
+          const userIsParticipant = !!participants.find(
+            (p) => p.userId === session.user.id
+          );
+
+          return userIsParticipant;
+        }
+      ),
     },
   },
 };
+
+export interface ConversationCreatedSubscriptionPayloadInterface {
+  conversationCreated: ConversationPopulated;
+}
 
 export const participantValidated =
   Prisma.validator<Prisma.ConversationParticipantInclude>()({
