@@ -34,7 +34,7 @@ const conversationResolvers = {
               },
             },
           },
-          include: conversationValidated,
+          include: conversationPopulated,
         });
         return conversations;
       } catch (error: any) {
@@ -68,7 +68,7 @@ const conversationResolvers = {
               },
             },
           },
-          include: conversationValidated, // stuff that we want returned on our conversation object
+          include: conversationPopulated, // stuff that we want returned on our conversation object
         });
 
         // emmit CONVERSATION_CREATED event using pubsub
@@ -122,7 +122,7 @@ export interface ConversationCreatedSubscriptionPayloadInterface {
   conversationCreated: ConversationPopulated;
 }
 
-export const participantValidated =
+export const participantPopulated =
   Prisma.validator<Prisma.ConversationParticipantInclude>()({
     user: {
       select: {
@@ -141,10 +141,10 @@ export const participantValidated =
 //   },
 // });
 
-export const conversationValidated =
+export const conversationPopulated =
   Prisma.validator<Prisma.ConversationInclude>()({
     participants: {
-      include: participantValidated,
+      include: participantPopulated,
     },
     latestMessage: {
       include: {

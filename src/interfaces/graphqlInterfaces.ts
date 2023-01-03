@@ -1,8 +1,8 @@
 import { ISODateString, Session, User } from "next-auth";
 import { Prisma, PrismaClient } from "@prisma/client";
 import {
-  conversationValidated,
-  participantValidated,
+  conversationPopulated,
+  participantPopulated,
 } from "../graphql/resolvers/conversation";
 import { Context } from "graphql-ws";
 import { PubSub } from "graphql-subscriptions";
@@ -55,9 +55,25 @@ export interface SearchUsersResponseInterface {
  */
 
 export type ConversationPopulated = Prisma.ConversationGetPayload<{
-  include: typeof conversationValidated;
+  include: typeof conversationPopulated;
 }>;
 
 export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
-  include: typeof participantValidated;
+  include: typeof participantPopulated;
 }>;
+
+/**
+ * Messages
+ */
+
+export interface SendMessageArguments {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+}
+
+export interface SendMessageResponseInterface {
+  success?: boolean;
+  error?: string;
+}
