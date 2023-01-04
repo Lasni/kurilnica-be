@@ -106,7 +106,7 @@ const conversationResolvers = {
             conversationCreated: { participants },
           } = payload;
 
-          // cast to boolean with !!
+          // cast to boolean with !! (try Boolean cast)
           const userIsParticipant = !!participants.find(
             (p) => p.userId === session.user.id
           );
