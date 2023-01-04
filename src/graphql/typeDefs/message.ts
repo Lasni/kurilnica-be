@@ -8,6 +8,10 @@ const messageTypeDefs = `#graphql
     createdAt: Date
   }
 
+  type Query {
+    messages(conversationId: String): [Message]
+  }
+
   type Mutation {
     sendMessage(id: String, conversationId: String, senderId: String, body: String): SendMessageResponse
   }
