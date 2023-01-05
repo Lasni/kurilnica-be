@@ -6,6 +6,7 @@ import {
   GraphQLContextInterface,
   MessagePopulated,
   SendMessageArguments,
+  SendMessageResponseInterface,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
 import { conversationPopulated } from "./conversation.js";
@@ -79,7 +80,7 @@ const messageResolvers = {
       args: SendMessageArguments,
       context: GraphQLContextInterface,
       info: any
-    ): Promise<Boolean> {
+    ): Promise<SendMessageResponseInterface> {
       const { session, prisma, pubsub } = context;
 
       if (!session.user) {
@@ -105,6 +106,19 @@ const messageResolvers = {
           include: messagePopulated,
         });
 
+        // find conversation participant entity
+        const participant = await prisma.conversationParticipant.findFirst({
+          where: {
+            userId: userId,
+            conversationId: conversationId,
+          },
+        });
+
+        // should always exist
+        if (!participant) {
+          throw new GraphQLError("Participant does not exist");
+        }
+
         // update conversation entity
         const updatedConversation = await prisma.conversation.update({
           where: {
@@ -116,7 +130,7 @@ const messageResolvers = {
               // for the sender, set hasSeenLatestMessage to true
               update: {
                 where: {
-                  id: senderId,
+                  id: participant.id,
                 },
                 data: {
                   hasSeenLatestMessage: true,
@@ -126,7 +140,7 @@ const messageResolvers = {
               updateMany: {
                 where: {
                   NOT: {
-                    id: senderId,
+                    userId: senderId,
                   },
                 },
                 data: {
@@ -135,6 +149,7 @@ const messageResolvers = {
               },
             },
           },
+          include: conversationPopulated,
         });
         // emmit MESSAGE_SENT and CONVERSATION_UPDATED events and subscriptions, so that targets can receive them
         pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
@@ -144,7 +159,10 @@ const messageResolvers = {
         // return {
         //   success: true,
         // };
-        return true;
+        return {
+          success: true,
+          error: "",
+        };
       } catch (error) {
         console.log("sendMessage error: ", error);
         throw new GraphQLError("Error sending message");

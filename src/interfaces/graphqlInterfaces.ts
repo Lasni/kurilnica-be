@@ -78,7 +78,7 @@ export interface SendMessageArguments {
   body: string;
 }
 
-// export interface SendMessageResponseInterface {
-//   success?: boolean;
-//   error?: string;
-// }
+export interface SendMessageResponseInterface {
+  success?: boolean;
+  error?: string;
+}
