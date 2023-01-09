@@ -63,6 +63,11 @@ export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
   include: typeof participantPopulated;
 }>;
 
+export interface MarkConversationAsReadInterface {
+  success?: boolean;
+  error?: string;
+}
+
 /**
  * Messages
  */

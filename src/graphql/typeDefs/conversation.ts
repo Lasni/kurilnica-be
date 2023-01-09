@@ -8,6 +8,15 @@ const conversationTypeDefs = `#graphql
     conversationId: String
   }
 
+  type Mutation {
+    markConversationAsRead(userId: String!, conversationId: String!): MarkConversationAsReadResponse 
+  }
+
+  type MarkConversationAsReadResponse {
+    success: Boolean
+    error: String
+  }
+
   type Query {
     conversations: [Conversation]
   }
@@ -30,6 +39,8 @@ const conversationTypeDefs = `#graphql
   type Subscription {
     conversationCreated: Conversation
   }
+
+  
 `;
 
 export default conversationTypeDefs;

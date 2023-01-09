@@ -2,9 +2,11 @@ import { Prisma } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { withFilter } from "graphql-subscriptions";
 import { ConversationEnum } from "../../enums/graphqlEnums";
+import { MarkConversationAsReadMutationOutput } from "../../../../frontend/src/interfaces/graphqlInterfaces";
 import {
   ConversationPopulated,
   GraphQLContextInterface,
+  MarkConversationAsReadInterface,
 } from "../../interfaces/graphqlInterfaces";
 
 const conversationResolvers = {
@@ -81,6 +83,48 @@ const conversationResolvers = {
         };
       } catch (error) {
         throw new GraphQLError(`Error creating conversation: ${error}`);
+      }
+    },
+
+    markConversationAsRead: async (
+      _: any,
+      args: { userId: string; conversationId: string },
+      contextValue: GraphQLContextInterface
+    ): Promise<MarkConversationAsReadInterface> => {
+      const { session, prisma } = contextValue;
+      const { userId, conversationId } = args;
+
+      if (!session.user) {
+        throw new GraphQLError("Not authorized.");
+      }
+
+      try {
+        const participant = await prisma.conversationParticipant.findFirst({
+          where: {
+            userId,
+            conversationId,
+          },
+        });
+        // Should always exist, but being safe
+        if (!participant) {
+          throw new GraphQLError("Participant entity not found");
+        }
+
+        await prisma.conversationParticipant.update({
+          where: {
+            id: participant.id,
+          },
+          data: {
+            hasSeenLatestMessage: true,
+          },
+        });
+        return {
+          success: true,
+          error: "",
+        };
+      } catch (error: any) {
+        console.log("markConversationAsReadError: ", error);
+        throw new GraphQLError(error?.message);
       }
     },
   },
