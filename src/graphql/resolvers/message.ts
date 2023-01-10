@@ -80,7 +80,7 @@ const messageResolvers = {
       args: SendMessageArguments,
       context: GraphQLContextInterface,
       info: any
-    ): Promise<SendMessageResponseInterface> {
+    ): Promise<Boolean> {
       const { session, prisma, pubsub } = context;
 
       if (!session.user) {
@@ -90,9 +90,9 @@ const messageResolvers = {
       const { id: userId } = session.user;
       const { id: messageId, senderId, conversationId, body } = args;
 
-      if (senderId !== userId) {
-        throw new GraphQLError("Not authorized");
-      }
+      // if (senderId !== userId) {
+      //   throw new GraphQLError("Not authorized");
+      // }
 
       try {
         // create a new message entity
@@ -109,8 +109,8 @@ const messageResolvers = {
         // find conversation participant entity
         const participant = await prisma.conversationParticipant.findFirst({
           where: {
-            userId: userId,
-            conversationId: conversationId,
+            userId,
+            conversationId,
           },
         });
 
@@ -118,6 +118,8 @@ const messageResolvers = {
         if (!participant) {
           throw new GraphQLError("Participant does not exist");
         }
+
+        const { id: participantId } = participant;
 
         // update conversation entity
         const updatedConversation = await prisma.conversation.update({
@@ -130,7 +132,7 @@ const messageResolvers = {
               // for the sender, set hasSeenLatestMessage to true
               update: {
                 where: {
-                  id: participant.id,
+                  id: participantId,
                 },
                 data: {
                   hasSeenLatestMessage: true,
@@ -140,7 +142,8 @@ const messageResolvers = {
               updateMany: {
                 where: {
                   NOT: {
-                    userId: senderId,
+                    userId,
+                    // userId: senderId,
                   },
                 },
                 data: {
@@ -156,13 +159,11 @@ const messageResolvers = {
         // pubsub.publish("CONVERSATION_UPDATED", {
         //   conversationUpdated: updatedConversation,
         // });
+        return true;
         // return {
         //   success: true,
+        //   error: "",
         // };
-        return {
-          success: true,
-          error: "",
-        };
       } catch (error) {
         console.log("sendMessage error: ", error);
         throw new GraphQLError("Error sending message");
@@ -176,12 +177,7 @@ const messageResolvers = {
   Subscription: {
     messageSent: {
       subscribe: withFilter(
-        (
-          parent: any,
-          args: any,
-          contextValue: GraphQLContextInterface,
-          info: any
-        ) => {
+        (parent: any, args: any, contextValue: GraphQLContextInterface) => {
           const { pubsub } = contextValue;
           return pubsub.asyncIterator([MessageEnum.MESSAGE_SENT]);
         },
