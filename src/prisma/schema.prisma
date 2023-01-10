@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "darwin", "darwin-arm64"] // for mac m1 chips (added darwin-arm64 for backend)
+  binaryTargets = ["native", "darwin", "darwin-arm64"]
 }
 
 model Account {
