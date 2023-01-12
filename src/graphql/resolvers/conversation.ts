@@ -3,6 +3,7 @@ import { GraphQLError } from "graphql";
 import { withFilter } from "graphql-subscriptions";
 import { ConversationEnum } from "../../enums/graphqlEnums";
 import { MarkConversationAsReadMutationOutput } from "../../../../frontend/src/interfaces/graphqlInterfaces";
+import { userIsConversationParticipant } from "../../util/helpers.js";
 import {
   ConversationPopulated,
   GraphQLContextInterface,
@@ -90,11 +91,11 @@ const conversationResolvers = {
       _: any,
       args: { userId: string; conversationId: string },
       contextValue: GraphQLContextInterface
-    ): Promise<MarkConversationAsReadInterface> => {
+    ): Promise<boolean> => {
       const { session, prisma } = contextValue;
       const { userId, conversationId } = args;
 
-      if (!session.user) {
+      if (!session?.user) {
         throw new GraphQLError("Not authorized.");
       }
 
@@ -118,10 +119,11 @@ const conversationResolvers = {
             hasSeenLatestMessage: true,
           },
         });
-        return {
-          success: true,
-          error: "",
-        };
+        return true;
+        // return {
+        //   success: true,
+        //   error: "",
+        // };
       } catch (error: any) {
         console.log("markConversationAsReadError: ", error);
         throw new GraphQLError(error?.message);
@@ -151,8 +153,12 @@ const conversationResolvers = {
           } = payload;
 
           // cast to boolean with !! (try Boolean cast)
-          const userIsParticipant = !!participants.find(
-            (p) => p.userId === session.user.id
+          // const userIsParticipant = Boolean(
+          //   participants.find((p) => p.userId === session.user.id)
+          // );
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            session.user.id
           );
 
           return userIsParticipant;

@@ -9,13 +9,13 @@ const conversationTypeDefs = `#graphql
   }
 
   type Mutation {
-    markConversationAsRead(userId: String!, conversationId: String!): MarkConversationAsReadResponse 
+    markConversationAsRead(userId: String!, conversationId: String!): Boolean 
   }
 
-  type MarkConversationAsReadResponse {
-    success: Boolean
-    error: String
-  }
+  # type MarkConversationAsReadResponse {
+  #   success: Boolean
+  #   error: String
+  # }
 
   type Query {
     conversations: [Conversation]

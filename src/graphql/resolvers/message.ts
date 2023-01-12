@@ -95,6 +95,8 @@ const messageResolvers = {
       // }
 
       try {
+        console.log("--------------------------");
+        console.log("sendMessage mutation -> conversationId", conversationId);
         // create a new message entity
         const newMessage = await prisma.message.create({
           data: {
@@ -177,18 +179,33 @@ const messageResolvers = {
   Subscription: {
     messageSent: {
       subscribe: withFilter(
-        (parent: any, args: any, contextValue: GraphQLContextInterface) => {
+        (_: any, __: any, contextValue: GraphQLContextInterface) => {
           const { pubsub } = contextValue;
-          return pubsub.asyncIterator([MessageEnum.MESSAGE_SENT]);
+          return pubsub.asyncIterator(["MESSAGE_SENT"]);
         },
         (
           payload: MessageSentSubscriptionPayloadInterface,
           variables: { conversationId: string },
           context: GraphQLContextInterface
         ) => {
+          // console.log(
+          //   "payload.messageSent.conversationId",
+          //   payload.messageSent.conversationId
+          // );
+          // console.log("variables.conversation.id: ", variables.conversationId);
+          // console.log("variables: ", variables);
+          // console.log("                        ");
+          // console.log("                        ");
+          // console.log("------------------------");
+          // console.log("                        ");
           return (
             payload.messageSent.conversationId === variables.conversationId
           );
+
+          // const shouldFire =
+          //   payload.messageSent.conversationId === variables.conversationId;
+          // console.log("shouldFire: ", shouldFire);
+          // return shouldFire;
         }
       ),
     },
