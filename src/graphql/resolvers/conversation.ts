@@ -6,8 +6,8 @@ import { MarkConversationAsReadMutationOutput } from "../../../../frontend/src/i
 import { userIsConversationParticipant } from "../../util/helpers.js";
 import {
   ConversationPopulated,
+  ConversationUpdatedSubscriptionPayload,
   GraphQLContextInterface,
-  MarkConversationAsReadInterface,
 } from "../../interfaces/graphqlInterfaces";
 
 const conversationResolvers = {
@@ -159,6 +159,45 @@ const conversationResolvers = {
           const userIsParticipant = userIsConversationParticipant(
             participants,
             session.user.id
+          );
+
+          return userIsParticipant;
+        }
+      ),
+    },
+
+    conversationUpdated: {
+      subscribe: withFilter(
+        (_: any, __: any, contextValue: GraphQLContextInterface) => {
+          const { pubsub } = contextValue;
+          return pubsub.asyncIterator([ConversationEnum.CONVERSATION_UPDATED]);
+        },
+        (
+          payload: ConversationUpdatedSubscriptionPayload,
+          _: any,
+          context: GraphQLContextInterface
+        ) => {
+          const { session } = context;
+          console.log("here is payloadDDDDDD: ", payload);
+          if (!session?.user) {
+            throw new GraphQLError("Not authorized");
+          }
+
+          // userId
+          const {
+            user: { id: userId },
+          } = session;
+
+          // participants
+          const {
+            conversationUpdated: {
+              conversation: { participants },
+            },
+          } = payload;
+
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            userId
           );
 
           return userIsParticipant;

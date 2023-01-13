@@ -158,9 +158,11 @@ const messageResolvers = {
         });
         // emmit MESSAGE_SENT and CONVERSATION_UPDATED events and subscriptions, so that targets can receive them
         pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
-        // pubsub.publish("CONVERSATION_UPDATED", {
-        //   conversationUpdated: updatedConversation,
-        // });
+        pubsub.publish("CONVERSATION_UPDATED", {
+          conversationUpdated: {
+            conversation: updatedConversation,
+          },
+        });
         return true;
         // return {
         //   success: true,
