@@ -19,6 +19,10 @@ const conversationTypeDefs = `#graphql
   #   error: String
   # }
 
+  type Mutation {
+    deleteConversation(conversationId: String!): Boolean
+  }
+
   type Query {
     conversations: [Conversation]
   }
@@ -48,6 +52,14 @@ const conversationTypeDefs = `#graphql
 
   type ConversationUpdatedSubscriptionPayload {
     conversation: Conversation
+  }
+
+  type Subscription {
+    conversationDeleted: ConversationDeletedSubscriptionPayload
+  }
+
+  type ConversationDeletedSubscriptionPayload {
+    id: String
   }
 
   

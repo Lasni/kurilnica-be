@@ -74,6 +74,10 @@ export interface ConversationUpdatedSubscriptionPayload {
   };
 }
 
+export interface ConversationDeletedSubscriptionPayload {
+  conversationDeleted: ConversationPopulated;
+}
+
 /**
  * Messages
  */
