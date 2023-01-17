@@ -64,7 +64,7 @@ const messageResolvers = {
         });
         return messages;
       } catch (error) {
-        console.log("messages error: ", error);
+        console.error("messages error: ", error);
         throw new GraphQLError("Error retrieving messages");
       }
       return [];
@@ -95,8 +95,6 @@ const messageResolvers = {
       // }
 
       try {
-        console.log("--------------------------");
-        console.log("sendMessage mutation -> conversationId", conversationId);
         // create a new message entity
         const newMessage = await prisma.message.create({
           data: {
@@ -169,7 +167,7 @@ const messageResolvers = {
         //   error: "",
         // };
       } catch (error) {
-        console.log("sendMessage error: ", error);
+        console.error("sendMessage error: ", error);
         throw new GraphQLError("Error sending message");
       }
     },
@@ -190,24 +188,9 @@ const messageResolvers = {
           variables: { conversationId: string },
           context: GraphQLContextInterface
         ) => {
-          // console.log(
-          //   "payload.messageSent.conversationId",
-          //   payload.messageSent.conversationId
-          // );
-          // console.log("variables.conversation.id: ", variables.conversationId);
-          // console.log("variables: ", variables);
-          // console.log("                        ");
-          // console.log("                        ");
-          // console.log("------------------------");
-          // console.log("                        ");
           return (
             payload.messageSent.conversationId === variables.conversationId
           );
-
-          // const shouldFire =
-          //   payload.messageSent.conversationId === variables.conversationId;
-          // console.log("shouldFire: ", shouldFire);
-          // return shouldFire;
         }
       ),
     },

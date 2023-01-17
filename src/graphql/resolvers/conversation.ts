@@ -125,7 +125,7 @@ const conversationResolvers = {
         //   error: "",
         // };
       } catch (error: any) {
-        console.log("markConversationAsReadError: ", error);
+        console.error("markConversationAsReadError: ", error);
         throw new GraphQLError(error?.message);
       }
     },
@@ -178,7 +178,6 @@ const conversationResolvers = {
           context: GraphQLContextInterface
         ) => {
           const { session } = context;
-          console.log("here is payloadDDDDDD: ", payload);
           if (!session?.user) {
             throw new GraphQLError("Not authorized");
           }
