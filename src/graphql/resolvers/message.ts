@@ -3,10 +3,12 @@ import { GraphQLError } from "graphql";
 import { withFilter } from "graphql-subscriptions";
 import { MessageEnum } from "../../enums/graphqlEnums";
 import {
-  GraphQLContextInterface,
+  GraphQLContext,
   MessagePopulated,
-  SendMessageArguments,
-  SendMessageResponseInterface,
+  MessagesQueryArgs,
+  MessagesQueryResponse,
+  SendMessageMutationArgs,
+  SendMessageMutationResponse,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
 import { conversationPopulated } from "./conversation.js";
@@ -17,11 +19,10 @@ const messageResolvers = {
    */
   Query: {
     messages: async function (
-      parent: any,
-      args: { conversationId: string },
-      context: GraphQLContextInterface,
-      info: any
-    ): Promise<Array<MessagePopulated>> {
+      _: any,
+      args: MessagesQueryArgs,
+      context: GraphQLContext
+    ): Promise<MessagesQueryResponse> {
       const { session, prisma } = context;
       const { conversationId } = args;
 
@@ -67,7 +68,7 @@ const messageResolvers = {
         console.error("messages error: ", error);
         throw new GraphQLError("Error retrieving messages");
       }
-      return [];
+      // return [];
     },
   },
 
@@ -76,11 +77,10 @@ const messageResolvers = {
    */
   Mutation: {
     sendMessage: async function (
-      parent: any,
-      args: SendMessageArguments,
-      context: GraphQLContextInterface,
-      info: any
-    ): Promise<Boolean> {
+      _: any,
+      args: SendMessageMutationArgs,
+      context: GraphQLContext
+    ): Promise<SendMessageMutationResponse> {
       const { session, prisma, pubsub } = context;
 
       if (!session.user) {
@@ -161,11 +161,11 @@ const messageResolvers = {
             conversation: updatedConversation,
           },
         });
-        return true;
-        // return {
-        //   success: true,
-        //   error: "",
-        // };
+        // return true;
+        return {
+          success: true,
+          error: "",
+        };
       } catch (error) {
         console.error("sendMessage error: ", error);
         throw new GraphQLError("Error sending message");
@@ -179,14 +179,14 @@ const messageResolvers = {
   Subscription: {
     messageSent: {
       subscribe: withFilter(
-        (_: any, __: any, contextValue: GraphQLContextInterface) => {
+        (_: any, __: any, contextValue: GraphQLContext) => {
           const { pubsub } = contextValue;
           return pubsub.asyncIterator(["MESSAGE_SENT"]);
         },
         (
           payload: MessageSentSubscriptionPayloadInterface,
           variables: { conversationId: string },
-          context: GraphQLContextInterface
+          context: GraphQLContext
         ) => {
           return (
             payload.messageSent.conversationId === variables.conversationId

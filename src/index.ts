@@ -16,7 +16,7 @@ import resolvers from "./graphql/resolvers/index.js";
 import typeDefs from "./graphql/typeDefs/index.js";
 import {
   CustomSessionInterface,
-  GraphQLContextInterface,
+  GraphQLContext,
   SubscriptionContextInterface,
 } from "./interfaces/graphqlInterfaces";
 
@@ -83,7 +83,7 @@ const serverCleanup = useServer(
     schema,
     context: async (
       ctx: SubscriptionContextInterface
-    ): Promise<GraphQLContextInterface> => {
+    ): Promise<GraphQLContext> => {
       if (ctx.connectionParams && ctx.connectionParams.session) {
         const { session } = ctx.connectionParams;
 
@@ -102,7 +102,7 @@ app.use(
   cors<cors.CorsRequest>(corsOptions),
   json(),
   expressMiddleware(server, {
-    context: async ({ req, res }): Promise<GraphQLContextInterface> => {
+    context: async ({ req, res }): Promise<GraphQLContext> => {
       const session = (await getSession({ req })) as CustomSessionInterface;
       return {
         // token: req.headers.token,

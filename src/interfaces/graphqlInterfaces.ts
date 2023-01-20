@@ -18,7 +18,7 @@ export interface SubscriptionContextInterface extends Context {
   };
 }
 
-export interface GraphQLContextInterface {
+export interface GraphQLContext {
   session: CustomSessionInterface | null; // next-auth session
   prisma: PrismaClient; // prisma client
   pubsub: PubSub; // pubsub module
@@ -82,18 +82,24 @@ export interface ConversationDeletedSubscriptionPayload {
  * Messages
  */
 
+export interface MessagesQueryArgs {
+  conversationId: string;
+}
+
 export type MessagePopulated = Prisma.MessageGetPayload<{
   include: typeof messagePopulated;
 }>;
 
-export interface SendMessageArguments {
+export type MessagesQueryResponse = Array<MessagePopulated>;
+
+export interface SendMessageMutationArgs {
   id: string;
   conversationId: string;
   senderId: string;
   body: string;
 }
 
-export interface SendMessageResponseInterface {
+export interface SendMessageMutationResponse {
   success?: boolean;
   error?: string;
 }

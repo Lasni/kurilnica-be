@@ -6,7 +6,7 @@ import {
   ConversationDeletedSubscriptionPayload,
   ConversationPopulated,
   ConversationUpdatedSubscriptionPayload,
-  GraphQLContextInterface,
+  GraphQLContext,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
 
@@ -15,7 +15,7 @@ const conversationResolvers = {
     conversations: async (
       parent: any,
       args: any,
-      contextValue: GraphQLContextInterface,
+      contextValue: GraphQLContext,
       info: any
     ): Promise<Array<ConversationPopulated>> => {
       const { session, prisma } = contextValue;
@@ -49,7 +49,7 @@ const conversationResolvers = {
     createConversation: async (
       parent: any,
       args: { participantIds: Array<string> },
-      contextValue: GraphQLContextInterface,
+      contextValue: GraphQLContext,
       info: any
     ): Promise<{ conversationId: string }> => {
       const { participantIds } = args;
@@ -90,7 +90,7 @@ const conversationResolvers = {
     markConversationAsRead: async (
       _: any,
       args: { userId: string; conversationId: string },
-      contextValue: GraphQLContextInterface
+      contextValue: GraphQLContext
     ): Promise<boolean> => {
       const { session, prisma } = contextValue;
       const { userId, conversationId } = args;
@@ -132,7 +132,7 @@ const conversationResolvers = {
     deleteConversation: async function (
       _: any,
       args: { conversationId: string },
-      context: GraphQLContextInterface
+      context: GraphQLContext
     ): Promise<boolean> {
       const { session, prisma, pubsub } = context;
       const { conversationId } = args;
@@ -180,19 +180,14 @@ const conversationResolvers = {
   Subscription: {
     conversationCreated: {
       subscribe: withFilter(
-        (
-          parent: any,
-          args: any,
-          contextValue: GraphQLContextInterface,
-          info: any
-        ) => {
+        (parent: any, args: any, contextValue: GraphQLContext, info: any) => {
           const { pubsub } = contextValue;
           return pubsub.asyncIterator([ConversationEnum.CONVERSATION_CREATED]);
         },
         (
           payload: ConversationCreatedSubscriptionPayloadInterface,
           variables,
-          context: GraphQLContextInterface
+          context: GraphQLContext
         ) => {
           const { session } = context;
           const {
@@ -210,14 +205,14 @@ const conversationResolvers = {
 
     conversationUpdated: {
       subscribe: withFilter(
-        (_: any, __: any, contextValue: GraphQLContextInterface) => {
+        (_: any, __: any, contextValue: GraphQLContext) => {
           const { pubsub } = contextValue;
           return pubsub.asyncIterator([ConversationEnum.CONVERSATION_UPDATED]);
         },
         (
           payload: ConversationUpdatedSubscriptionPayload,
           _: any,
-          context: GraphQLContextInterface
+          context: GraphQLContext
         ) => {
           const { session } = context;
           if (!session?.user) {
@@ -243,7 +238,7 @@ const conversationResolvers = {
 
     conversationDeleted: {
       subscribe: withFilter(
-        (_: any, __: any, context: GraphQLContextInterface) => {
+        (_: any, __: any, context: GraphQLContext) => {
           const { pubsub } = context;
           return pubsub.asyncIterator(["CONVERSATION_DELETED"]);
         },
@@ -251,7 +246,7 @@ const conversationResolvers = {
         (
           payload: ConversationDeletedSubscriptionPayload,
           _: any,
-          context: GraphQLContextInterface
+          context: GraphQLContext
         ) => {
           const { session } = context;
           if (!session.user) {

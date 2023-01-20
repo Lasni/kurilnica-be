@@ -3,7 +3,7 @@ import { CustomUserInterface } from "../../interfaces/graphqlInterfaces";
 import { SearchedUser } from "../../../../frontend/src/interfaces/graphqlInterfaces";
 import {
   CreateUsernameResponseInterface,
-  GraphQLContextInterface,
+  GraphQLContext,
   SearchUsersResponseInterface,
 } from "../../interfaces/graphqlInterfaces";
 import { GraphQLError } from "graphql";
@@ -13,7 +13,7 @@ const userResolvers = {
     searchUsers: async (
       parent: any,
       args: { username: string },
-      contextValue: GraphQLContextInterface,
+      contextValue: GraphQLContext,
       info: any
     ): Promise<Array<User>> => {
       const { username: searchedUsername } = args;
@@ -45,7 +45,7 @@ const userResolvers = {
     createUsername: async (
       parent: any,
       args: { username: string },
-      contextValue: GraphQLContextInterface,
+      contextValue: GraphQLContext,
       info: any
     ): Promise<CreateUsernameResponseInterface> => {
       const { username } = args;
