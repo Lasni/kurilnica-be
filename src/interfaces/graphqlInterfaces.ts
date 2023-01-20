@@ -63,10 +63,15 @@ export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
   include: typeof participantPopulated;
 }>;
 
-// export interface MarkConversationAsReadInterface {
-//   success?: boolean;
-//   error?: string;
-// }
+export interface MarkConversationAsReadMutationArgs {
+  userId: string;
+  conversationId: string;
+}
+
+export interface MarkConversationAsReadMutationResponse {
+  success?: boolean;
+  error?: string;
+}
 
 export interface ConversationUpdatedSubscriptionPayload {
   conversationUpdated: {

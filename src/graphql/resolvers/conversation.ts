@@ -7,6 +7,8 @@ import {
   ConversationPopulated,
   ConversationUpdatedSubscriptionPayload,
   GraphQLContext,
+  MarkConversationAsReadMutationArgs,
+  MarkConversationAsReadMutationResponse,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
 
@@ -89,9 +91,9 @@ const conversationResolvers = {
 
     markConversationAsRead: async (
       _: any,
-      args: { userId: string; conversationId: string },
+      args: MarkConversationAsReadMutationArgs,
       contextValue: GraphQLContext
-    ): Promise<boolean> => {
+    ): Promise<MarkConversationAsReadMutationResponse> => {
       const { session, prisma } = contextValue;
       const { userId, conversationId } = args;
 
@@ -119,11 +121,10 @@ const conversationResolvers = {
             hasSeenLatestMessage: true,
           },
         });
-        return true;
-        // return {
-        //   success: true,
-        //   error: "",
-        // };
+        return {
+          success: true,
+          error: "",
+        };
       } catch (error: any) {
         console.error("markConversationAsReadError: ", error);
         throw new GraphQLError(error?.message);

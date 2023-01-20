@@ -13,10 +13,10 @@ const messageTypeDefs = `#graphql
   }
 
   type Mutation {
-    sendMessage(id: String, conversationId: String, senderId: String, body: String): SendMessageResponse
+    sendMessage(id: String, conversationId: String, senderId: String, body: String): SendMessageMutationResponse
   }
 
-  type SendMessageResponse {
+  type SendMessageMutationResponse {
     success: Boolean
     error: String
   }
