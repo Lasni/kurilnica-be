@@ -63,6 +63,22 @@ export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
   include: typeof participantPopulated;
 }>;
 
+export type ConversationsQueryResponse = Array<ConversationPopulated>;
+
+// export interface ConversationsQueryResponse {
+//   conversations: Array<ConversationPopulated>;
+// }
+
+export interface CreateConversationMutationArgs {
+  participantIds: Array<string>;
+}
+
+export interface CreateConversationMutationResponse {
+  success?: boolean;
+  error?: string;
+  conversationId?: string;
+}
+
 export interface MarkConversationAsReadMutationArgs {
   userId: string;
   conversationId: string;
@@ -71,6 +87,22 @@ export interface MarkConversationAsReadMutationArgs {
 export interface MarkConversationAsReadMutationResponse {
   success?: boolean;
   error?: string;
+}
+
+export interface DeleteConversationMutationArgs {
+  conversationId: string;
+}
+
+export interface DeleteConversationMutationResponse {
+  success?: boolean;
+  error?: string;
+}
+
+export interface ConversationCreatedSubscriptionPayload {
+  conversationCreated: ConversationPopulated;
+  // {
+  //   conversation: ConversationPopulated;
+  // };
 }
 
 export interface ConversationUpdatedSubscriptionPayload {

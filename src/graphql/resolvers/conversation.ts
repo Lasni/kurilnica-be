@@ -3,9 +3,14 @@ import { GraphQLError } from "graphql";
 import { withFilter } from "graphql-subscriptions";
 import { ConversationEnum } from "../../enums/graphqlEnums";
 import {
+  ConversationCreatedSubscriptionPayload,
   ConversationDeletedSubscriptionPayload,
-  ConversationPopulated,
+  ConversationsQueryResponse,
   ConversationUpdatedSubscriptionPayload,
+  CreateConversationMutationArgs,
+  CreateConversationMutationResponse,
+  DeleteConversationMutationArgs,
+  DeleteConversationMutationResponse,
   GraphQLContext,
   MarkConversationAsReadMutationArgs,
   MarkConversationAsReadMutationResponse,
@@ -15,12 +20,11 @@ import { userIsConversationParticipant } from "../../util/helpers.js";
 const conversationResolvers = {
   Query: {
     conversations: async (
-      parent: any,
-      args: any,
-      contextValue: GraphQLContext,
-      info: any
-    ): Promise<Array<ConversationPopulated>> => {
-      const { session, prisma } = contextValue;
+      _: any,
+      __: any,
+      context: GraphQLContext
+    ): Promise<ConversationsQueryResponse> => {
+      const { session, prisma } = context;
       if (!session?.user) {
         throw new GraphQLError(`Not authorized`);
       }
@@ -49,13 +53,12 @@ const conversationResolvers = {
   },
   Mutation: {
     createConversation: async (
-      parent: any,
-      args: { participantIds: Array<string> },
-      contextValue: GraphQLContext,
-      info: any
-    ): Promise<{ conversationId: string }> => {
+      _: any,
+      args: CreateConversationMutationArgs,
+      context: GraphQLContext
+    ): Promise<CreateConversationMutationResponse> => {
       const { participantIds } = args;
-      const { prisma, session, pubsub } = contextValue;
+      const { prisma, session, pubsub } = context;
       if (!session?.user) {
         throw new GraphQLError("Not authorized");
       }
@@ -82,6 +85,8 @@ const conversationResolvers = {
         });
 
         return {
+          success: true,
+          error: "",
           conversationId: conversation.id,
         };
       } catch (error) {
@@ -92,9 +97,9 @@ const conversationResolvers = {
     markConversationAsRead: async (
       _: any,
       args: MarkConversationAsReadMutationArgs,
-      contextValue: GraphQLContext
+      context: GraphQLContext
     ): Promise<MarkConversationAsReadMutationResponse> => {
-      const { session, prisma } = contextValue;
+      const { session, prisma } = context;
       const { userId, conversationId } = args;
 
       if (!session?.user) {
@@ -108,7 +113,6 @@ const conversationResolvers = {
             conversationId,
           },
         });
-        // Should always exist, but being safe
         if (!participant) {
           throw new GraphQLError("Participant entity not found");
         }
@@ -132,13 +136,12 @@ const conversationResolvers = {
     },
     deleteConversation: async function (
       _: any,
-      args: { conversationId: string },
+      args: DeleteConversationMutationArgs,
       context: GraphQLContext
-    ): Promise<boolean> {
+    ): Promise<DeleteConversationMutationResponse> {
       const { session, prisma, pubsub } = context;
       const { conversationId } = args;
 
-      // check that user exists
       if (!session.user) {
         throw new GraphQLError("Not authorized");
       }
@@ -175,19 +178,22 @@ const conversationResolvers = {
         throw new GraphQLError("Failed to delete conversation");
       }
 
-      return true;
+      return {
+        success: true,
+        error: "",
+      };
     },
   },
   Subscription: {
     conversationCreated: {
       subscribe: withFilter(
-        (parent: any, args: any, contextValue: GraphQLContext, info: any) => {
-          const { pubsub } = contextValue;
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
           return pubsub.asyncIterator([ConversationEnum.CONVERSATION_CREATED]);
         },
         (
-          payload: ConversationCreatedSubscriptionPayloadInterface,
-          variables,
+          payload: ConversationCreatedSubscriptionPayload,
+          _: any,
           context: GraphQLContext
         ) => {
           const { session } = context;
@@ -195,10 +201,6 @@ const conversationResolvers = {
             conversationCreated: { participants },
           } = payload;
 
-          // cast to boolean with !! (try Boolean cast)
-          // const userIsParticipant = Boolean(
-          //   participants.find((p) => p.userId === session.user.id)
-          // );
           return userIsConversationParticipant(participants, session.user.id);
         }
       ),
@@ -206,8 +208,8 @@ const conversationResolvers = {
 
     conversationUpdated: {
       subscribe: withFilter(
-        (_: any, __: any, contextValue: GraphQLContext) => {
-          const { pubsub } = contextValue;
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
           return pubsub.asyncIterator([ConversationEnum.CONVERSATION_UPDATED]);
         },
         (
@@ -220,12 +222,10 @@ const conversationResolvers = {
             throw new GraphQLError("Not authorized");
           }
 
-          // userId
           const {
             user: { id: userId },
           } = session;
 
-          // participants
           const {
             conversationUpdated: {
               conversation: { participants },
@@ -266,10 +266,6 @@ const conversationResolvers = {
   },
 };
 
-export interface ConversationCreatedSubscriptionPayloadInterface {
-  conversationCreated: ConversationPopulated;
-}
-
 export const participantPopulated =
   Prisma.validator<Prisma.ConversationParticipantInclude>()({
     user: {
@@ -280,14 +276,14 @@ export const participantPopulated =
     },
   });
 
-// export const senderValidated = Prisma.validator<Prisma.MessageInclude>()({
-//   sender: {
-//     select: {
-//       id: true,
-//       username: true,
-//     },
-//   },
-// });
+export const senderPopulated = Prisma.validator<Prisma.MessageInclude>()({
+  sender: {
+    select: {
+      id: true,
+      username: true,
+    },
+  },
+});
 
 export const conversationPopulated =
   Prisma.validator<Prisma.ConversationInclude>()({
@@ -295,14 +291,7 @@ export const conversationPopulated =
       include: participantPopulated,
     },
     latestMessage: {
-      include: {
-        sender: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
+      include: senderPopulated,
     },
   });
 

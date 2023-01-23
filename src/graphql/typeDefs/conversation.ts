@@ -5,10 +5,10 @@ const conversationTypeDefs = `#graphql
   }
 
   type CreateConversationResponse {
+    success: Boolean
+    error: String
     conversationId: String
   }
-
-  
 
   type Mutation {
     markConversationAsRead(userId: String!, conversationId: String!): MarkConversationAsReadResponse 
@@ -20,7 +20,12 @@ const conversationTypeDefs = `#graphql
   }
 
   type Mutation {
-    deleteConversation(conversationId: String!): Boolean
+    deleteConversation(conversationId: String!): DeleteConversationResponse
+  }
+
+  type DeleteConversationResponse {
+    success: Boolean
+    error: String
   }
 
   type Query {
@@ -45,11 +50,13 @@ const conversationTypeDefs = `#graphql
   type Subscription {
     conversationCreated: Conversation
   }
+  # type ConversationCreatedSubscriptionPayload {
+  #   conversation: Conversation
+  # }
 
   type Subscription {
     conversationUpdated: ConversationUpdatedSubscriptionPayload
   }
-
   type ConversationUpdatedSubscriptionPayload {
     conversation: Conversation
   }
@@ -57,12 +64,9 @@ const conversationTypeDefs = `#graphql
   type Subscription {
     conversationDeleted: ConversationDeletedSubscriptionPayload
   }
-
   type ConversationDeletedSubscriptionPayload {
     id: String
   }
-
-  
 `;
 
 export default conversationTypeDefs;
