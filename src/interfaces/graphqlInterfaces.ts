@@ -140,3 +140,10 @@ export interface SendMessageMutationResponse {
   success?: boolean;
   error?: string;
 }
+
+export interface MessageSentSubscriptionPayload {
+  messageSent: MessagePopulated;
+}
+export interface MessageSentSubscriptionVariables {
+  conversationId: string;
+}

@@ -1,10 +1,11 @@
 import { Prisma } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { withFilter } from "graphql-subscriptions";
-import { MessageEnum } from "../../enums/graphqlEnums";
+import { ConversationEnum, MessageEnum } from "../../enums/graphqlEnums";
 import {
   GraphQLContext,
-  MessagePopulated,
+  MessageSentSubscriptionPayload,
+  MessageSentSubscriptionVariables,
   MessagesQueryArgs,
   MessagesQueryResponse,
   SendMessageMutationArgs,
@@ -68,7 +69,6 @@ const messageResolvers = {
         console.error("messages error: ", error);
         throw new GraphQLError("Error retrieving messages");
       }
-      // return [];
     },
   },
 
@@ -90,9 +90,9 @@ const messageResolvers = {
       const { id: userId } = session.user;
       const { id: messageId, senderId, conversationId, body } = args;
 
-      // if (senderId !== userId) {
-      //   throw new GraphQLError("Not authorized");
-      // }
+      if (senderId !== userId) {
+        throw new GraphQLError("Not authorized");
+      }
 
       try {
         // create a new message entity
@@ -155,13 +155,12 @@ const messageResolvers = {
           include: conversationPopulated,
         });
         // emmit MESSAGE_SENT and CONVERSATION_UPDATED events and subscriptions, so that targets can receive them
-        pubsub.publish("MESSAGE_SENT", { messageSent: newMessage });
-        pubsub.publish("CONVERSATION_UPDATED", {
+        pubsub.publish(MessageEnum.MESSAGE_SENT, { messageSent: newMessage });
+        pubsub.publish(ConversationEnum.CONVERSATION_UPDATED, {
           conversationUpdated: {
             conversation: updatedConversation,
           },
         });
-        // return true;
         return {
           success: true,
           error: "",
@@ -179,13 +178,13 @@ const messageResolvers = {
   Subscription: {
     messageSent: {
       subscribe: withFilter(
-        (_: any, __: any, contextValue: GraphQLContext) => {
-          const { pubsub } = contextValue;
-          return pubsub.asyncIterator(["MESSAGE_SENT"]);
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator([MessageEnum.MESSAGE_SENT]);
         },
         (
-          payload: MessageSentSubscriptionPayloadInterface,
-          variables: { conversationId: string },
+          payload: MessageSentSubscriptionPayload,
+          variables: MessageSentSubscriptionVariables,
           context: GraphQLContext
         ) => {
           return (
@@ -205,9 +204,5 @@ export const messagePopulated = Prisma.validator<Prisma.MessageInclude>()({
     },
   },
 });
-
-export interface MessageSentSubscriptionPayloadInterface {
-  messageSent: MessagePopulated;
-}
 
 export default messageResolvers;
