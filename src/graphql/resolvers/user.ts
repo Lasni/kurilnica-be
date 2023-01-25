@@ -1,23 +1,21 @@
-import { User } from "next-auth";
-import { CustomUserInterface } from "../../interfaces/graphqlInterfaces";
-import { SearchedUser } from "../../../../frontend/src/interfaces/graphqlInterfaces";
-import {
-  CreateUsernameResponseInterface,
-  GraphQLContext,
-  SearchUsersResponseInterface,
-} from "../../interfaces/graphqlInterfaces";
 import { GraphQLError } from "graphql";
+import {
+  CreateUsernameMutationArgs,
+  CreateUsernameMutationResponse,
+  GraphQLContext,
+  SearchUsersQueryArgs,
+  SearchUsersQueryResponse,
+} from "../../interfaces/graphqlInterfaces";
 
 const userResolvers = {
   Query: {
-    searchUsers: async (
-      parent: any,
-      args: { username: string },
-      contextValue: GraphQLContext,
-      info: any
-    ): Promise<Array<User>> => {
+    searchUsers: async function (
+      _: any,
+      args: SearchUsersQueryArgs,
+      context: GraphQLContext
+    ): Promise<SearchUsersQueryResponse> {
       const { username: searchedUsername } = args;
-      const { prisma, session } = contextValue;
+      const { prisma, session } = context;
 
       if (!session?.user) {
         throw new GraphQLError("Not Authorized");
@@ -42,14 +40,13 @@ const userResolvers = {
     },
   },
   Mutation: {
-    createUsername: async (
-      parent: any,
-      args: { username: string },
-      contextValue: GraphQLContext,
-      info: any
-    ): Promise<CreateUsernameResponseInterface> => {
+    createUsername: async function (
+      _: any,
+      args: CreateUsernameMutationArgs,
+      context: GraphQLContext
+    ): Promise<CreateUsernameMutationResponse> {
       const { username } = args;
-      const { prisma, session } = contextValue;
+      const { prisma, session } = context;
 
       if (!session?.user) {
         return {

@@ -1,7 +1,7 @@
-import { ParticipantPopulated } from "../interfaces/graphqlInterfaces";
+import { ConversationParticipantPopulated } from "../interfaces/graphqlInterfaces";
 
 export function userIsConversationParticipant(
-  participants: Array<ParticipantPopulated>,
+  participants: Array<ConversationParticipantPopulated>,
   userId: string
 ): boolean {
   return Boolean(

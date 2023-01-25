@@ -1,11 +1,11 @@
-import { ISODateString, Session, User } from "next-auth";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { PubSub } from "graphql-subscriptions";
+import { Context } from "graphql-ws";
+import { ISODateString } from "next-auth";
 import {
   conversationPopulated,
   participantPopulated,
 } from "../graphql/resolvers/conversation";
-import { Context } from "graphql-ws";
-import { PubSub } from "graphql-subscriptions";
 import { messagePopulated } from "../graphql/resolvers/message";
 
 /**
@@ -29,10 +29,24 @@ export interface CustomSessionInterface {
   expires: ISODateString;
 }
 
-/**
- * Users
- */
+//* USER
+// searchUsers query
+export interface SearchUsersQueryArgs {
+  username: string;
+}
+export type SearchUsersQueryResponse = Array<SearchedUser>;
+export type SearchedUser = Pick<CustomUserInterface, "id" | "username">;
 
+// createUsername mutation
+export interface CreateUsernameMutationArgs {
+  username: string;
+}
+export interface CreateUsernameMutationResponse {
+  success?: boolean;
+  error?: string;
+}
+
+// custom user
 export interface CustomUserInterface {
   id: string;
   username: string;
@@ -42,105 +56,92 @@ export interface CustomUserInterface {
   name: string;
 }
 
-export interface CreateUsernameResponseInterface {
-  success?: boolean;
-  error?: string;
-}
-
-export interface SearchUsersResponseInterface {
-  searchUsers: Array<Pick<CustomUserInterface, "id" | "username">>;
-}
-
-/**
- * Conversations
- */
+//* CONVERSATION
 
 export type ConversationPopulated = Prisma.ConversationGetPayload<{
   include: typeof conversationPopulated;
 }>;
 
-export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
-  include: typeof participantPopulated;
-}>;
+export type ConversationParticipantPopulated =
+  Prisma.ConversationParticipantGetPayload<{
+    include: typeof participantPopulated;
+  }>;
 
+// conversations query
 export type ConversationsQueryResponse = Array<ConversationPopulated>;
 
-// export interface ConversationsQueryResponse {
-//   conversations: Array<ConversationPopulated>;
-// }
-
+// createConversation mutation
 export interface CreateConversationMutationArgs {
   participantIds: Array<string>;
 }
-
 export interface CreateConversationMutationResponse {
   success?: boolean;
   error?: string;
   conversationId?: string;
 }
 
+// markConversationAsRead mutation
 export interface MarkConversationAsReadMutationArgs {
   userId: string;
   conversationId: string;
 }
-
 export interface MarkConversationAsReadMutationResponse {
   success?: boolean;
   error?: string;
 }
 
+// deleteConversation mutation
 export interface DeleteConversationMutationArgs {
   conversationId: string;
 }
-
 export interface DeleteConversationMutationResponse {
   success?: boolean;
   error?: string;
 }
 
+// conversationCreated subscription
 export interface ConversationCreatedSubscriptionPayload {
   conversationCreated: ConversationPopulated;
-  // {
-  //   conversation: ConversationPopulated;
-  // };
 }
 
+// conversationUpdated subscription
 export interface ConversationUpdatedSubscriptionPayload {
   conversationUpdated: {
     conversation: ConversationPopulated;
   };
 }
 
+// conversationDeleted subscription
 export interface ConversationDeletedSubscriptionPayload {
   conversationDeleted: ConversationPopulated;
 }
 
-/**
- * Messages
- */
+//* MESSAGE
 
-export interface MessagesQueryArgs {
-  conversationId: string;
-}
-
+// message populated
 export type MessagePopulated = Prisma.MessageGetPayload<{
   include: typeof messagePopulated;
 }>;
 
+// messages query
+export interface MessagesQueryArgs {
+  conversationId: string;
+}
 export type MessagesQueryResponse = Array<MessagePopulated>;
 
+// sendMessage mutation
 export interface SendMessageMutationArgs {
   id: string;
   conversationId: string;
   senderId: string;
   body: string;
 }
-
 export interface SendMessageMutationResponse {
   success?: boolean;
   error?: string;
 }
 
+// messageSent subscription
 export interface MessageSentSubscriptionPayload {
   messageSent: MessagePopulated;
 }
