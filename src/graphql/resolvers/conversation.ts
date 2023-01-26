@@ -177,15 +177,14 @@ const conversationResolvers = {
         pubsub.publish("CONVERSATION_DELETED", {
           conversationDeleted: deletedConversation,
         });
+        return {
+          success: true,
+          error: "",
+        };
       } catch (error: any) {
         console.error("deleteConversation error: ", error);
         throw new GraphQLError("Failed to delete conversation");
       }
-
-      return {
-        success: true,
-        error: "",
-      };
     },
 
     leaveConversation: async function (
@@ -197,11 +196,57 @@ const conversationResolvers = {
       const { prisma, pubsub, session } = context;
       const { conversationId, conversationParticipantsIds } = args;
 
-      console.log("from leaveConversation resolver: ");
-      console.log("conversationId: ", conversationId);
-      console.log("conversationParticipantsIds: ", conversationParticipantsIds);
+      // console.log("from leaveConversation resolver: ");
+      // console.log("conversationId: ", conversationId);
+      // console.log("conversationParticipantsIds: ", conversationParticipantsIds);
 
-      return {};
+      // Check that the user exists on session (auhorized)
+      if (!session.user) {
+        throw new GraphQLError("Not authorized");
+      }
+
+      const {
+        user: { id: userId },
+      } = session;
+
+      try {
+        // find the conversationParticipantToDelete where it matches both conversationId and userId
+        const conversationParticipantToDelete =
+          await prisma.conversationParticipant.findFirst({
+            where: {
+              conversationId: conversationId,
+              userId: userId,
+            },
+          });
+
+        if (!conversationParticipantToDelete) {
+          throw new GraphQLError("conversationParticipantToDelete not found");
+        }
+
+        const [conversationLeft] = await prisma.$transaction(
+          // delete conversationParticipant
+          [
+            prisma.conversationParticipant.delete({
+              where: {
+                id: conversationParticipantToDelete.id,
+              },
+            }),
+          ]
+
+          // update conversation
+          // [prisma.conversation.update]
+        );
+        pubsub.publish("CONVERSATION_LEFT", {
+          conversationLeft: conversationLeft,
+        });
+        return {
+          success: true,
+          error: "",
+        };
+      } catch (error: any) {
+        console.error("leaveConversation resolver error: ", error);
+        throw new GraphQLError(error.message);
+      }
     },
   },
   Subscription: {
