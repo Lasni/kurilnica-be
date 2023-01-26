@@ -99,6 +99,16 @@ export interface DeleteConversationMutationResponse {
   error?: string;
 }
 
+// leaveConversation mutation
+export interface LeaveConversationMutationArgs {
+  conversationId: string;
+  conversationParticipantsIds: Array<string>;
+}
+export interface LeaveConversationMutationResponse {
+  success?: boolean;
+  error?: string;
+}
+
 // conversationCreated subscription
 export interface ConversationCreatedSubscriptionPayload {
   conversationCreated: ConversationPopulated;

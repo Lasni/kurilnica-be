@@ -11,11 +11,15 @@ import {
   CreateConversationMutationResponse,
   DeleteConversationMutationArgs,
   DeleteConversationMutationResponse,
-  GraphQLContext,
+  LeaveConversationMutationResponse,
   MarkConversationAsReadMutationArgs,
   MarkConversationAsReadMutationResponse,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
+import {
+  GraphQLContext,
+  LeaveConversationMutationArgs,
+} from "../../interfaces/graphqlInterfaces";
 
 const conversationResolvers = {
   Query: {
@@ -182,6 +186,22 @@ const conversationResolvers = {
         success: true,
         error: "",
       };
+    },
+
+    leaveConversation: async function (
+      _: any,
+      args: LeaveConversationMutationArgs,
+      context: GraphQLContext
+    ): Promise<LeaveConversationMutationResponse> {
+      // Destructure context and args
+      const { prisma, pubsub, session } = context;
+      const { conversationId, conversationParticipantsIds } = args;
+
+      console.log("from leaveConversation resolver: ");
+      console.log("conversationId: ", conversationId);
+      console.log("conversationParticipantsIds: ", conversationParticipantsIds);
+
+      return {};
     },
   },
   Subscription: {
