@@ -196,10 +196,6 @@ const conversationResolvers = {
       const { prisma, pubsub, session } = context;
       const { conversationId, conversationParticipantsIds } = args;
 
-      // console.log("from leaveConversation resolver: ");
-      // console.log("conversationId: ", conversationId);
-      // console.log("conversationParticipantsIds: ", conversationParticipantsIds);
-
       // Check that the user exists on session (auhorized)
       if (!session.user) {
         throw new GraphQLError("Not authorized");
@@ -232,12 +228,24 @@ const conversationResolvers = {
               },
             }),
           ]
-
           // update conversation
           // [prisma.conversation.update]
         );
-        pubsub.publish("CONVERSATION_LEFT", {
-          conversationLeft: conversationLeft,
+        // pubsub.publish("CONVERSATION_LEFT", {
+        //   conversationLeft: conversationLeft,
+        // });
+
+        console.log("conversationLeft: ", conversationLeft);
+        //! TODO - conversationLeft has an unwanted conversationId prop and wrong id prop
+        //! id should have the value of conversationId (check how data is passed through that this happens)
+        // conversationLeft.id = conversationLeft.conversationId;
+
+        // publish the conversation update
+        pubsub.publish(ConversationEnum.CONVERSATION_UPDATED, {
+          conversationUpdated: {
+            conversation: conversationLeft,
+            removedUserIds: [conversationParticipantToDelete.userId],
+          },
         });
         return {
           success: true,
@@ -275,6 +283,7 @@ const conversationResolvers = {
       subscribe: withFilter(
         (_: any, __: any, context: GraphQLContext) => {
           const { pubsub } = context;
+          // receive (listen to) the conversation update
           return pubsub.asyncIterator([ConversationEnum.CONVERSATION_UPDATED]);
         },
         (
@@ -294,10 +303,32 @@ const conversationResolvers = {
           const {
             conversationUpdated: {
               conversation: { participants },
+              removedUserIds,
             },
           } = payload;
 
-          return userIsConversationParticipant(participants, userId);
+          // console.log("payload", payload);
+          // console.log("removedUserIds: ", removedUserIds);
+
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            userId
+          );
+
+          // const userSentLatestMessage =
+          //   payload.conversationUpdated.conversation.latestMessage?.senderId ===
+          //   userId;
+
+          const userIsbeingRemoved =
+            typeof removedUserIds !== "undefined" &&
+            removedUserIds.length > 0 &&
+            Boolean(removedUserIds?.find((id) => id === userId));
+
+          return (
+            userIsParticipant ||
+            // userSentLatestMessage ||
+            userIsbeingRemoved
+          );
         }
       ),
     },

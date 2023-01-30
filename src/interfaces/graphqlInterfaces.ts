@@ -118,6 +118,7 @@ export interface ConversationCreatedSubscriptionPayload {
 export interface ConversationUpdatedSubscriptionPayload {
   conversationUpdated: {
     conversation: ConversationPopulated;
+    removedUserIds: Array<string>;
   };
 }
 

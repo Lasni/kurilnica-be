@@ -5,6 +5,6 @@ export function userIsConversationParticipant(
   userId: string
 ): boolean {
   return Boolean(
-    participants.find((participant) => participant.userId === userId)
+    participants?.find((participant) => participant.userId === userId)
   );
 }
