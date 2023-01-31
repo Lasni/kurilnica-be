@@ -11,15 +11,13 @@ import {
   CreateConversationMutationResponse,
   DeleteConversationMutationArgs,
   DeleteConversationMutationResponse,
+  GraphQLContext,
+  LeaveConversationMutationArgs,
   LeaveConversationMutationResponse,
   MarkConversationAsReadMutationArgs,
   MarkConversationAsReadMutationResponse,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
-import {
-  GraphQLContext,
-  LeaveConversationMutationArgs,
-} from "../../interfaces/graphqlInterfaces";
 
 const conversationResolvers = {
   Query: {
@@ -219,26 +217,24 @@ const conversationResolvers = {
           throw new GraphQLError("conversationParticipantToDelete not found");
         }
 
-        const [conversationLeft] = await prisma.$transaction(
-          // delete conversationParticipant
-          [
-            prisma.conversationParticipant.delete({
-              where: {
-                id: conversationParticipantToDelete.id,
+        const [conversationLeft] = await prisma.$transaction([
+          prisma.conversation.update({
+            where: {
+              id: conversationId,
+            },
+            data: {
+              participants: {
+                deleteMany: {
+                  userId: {
+                    equals: conversationParticipantToDelete.userId,
+                  },
+                  conversationId,
+                },
               },
-            }),
-          ]
-          // update conversation
-          // [prisma.conversation.update]
-        );
-        // pubsub.publish("CONVERSATION_LEFT", {
-        //   conversationLeft: conversationLeft,
-        // });
-
-        console.log("conversationLeft: ", conversationLeft);
-        //! TODO - conversationLeft has an unwanted conversationId prop and wrong id prop
-        //! id should have the value of conversationId (check how data is passed through that this happens)
-        // conversationLeft.id = conversationLeft.conversationId;
+            },
+            include: conversationPopulated,
+          }),
+        ]);
 
         // publish the conversation update
         pubsub.publish(ConversationEnum.CONVERSATION_UPDATED, {
@@ -306,9 +302,6 @@ const conversationResolvers = {
               removedUserIds,
             },
           } = payload;
-
-          // console.log("payload", payload);
-          // console.log("removedUserIds: ", removedUserIds);
 
           const userIsParticipant = userIsConversationParticipant(
             participants,
