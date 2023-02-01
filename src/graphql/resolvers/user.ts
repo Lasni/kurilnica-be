@@ -14,7 +14,7 @@ const userResolvers = {
       args: SearchUsersQueryArgs,
       context: GraphQLContext
     ): Promise<SearchUsersQueryResponse> {
-      const { username: searchedUsername } = args;
+      const { username: searchedUsername, usernamesInCurrentConvo } = args;
       const { prisma, session } = context;
 
       if (!session?.user) {
@@ -23,13 +23,23 @@ const userResolvers = {
 
       const { username: signedInUsername } = session.user;
 
+      console.log(
+        "searchUsers resolver -> usernamesInCurrentConvo: ",
+        usernamesInCurrentConvo
+      );
+
       try {
         const users = await prisma.user.findMany({
           where: {
             username: {
               contains: searchedUsername,
-              not: signedInUsername,
-              mode: "insensitive",
+              // not: signedInUsername,
+              mode: "default",
+            },
+            NOT: {
+              username: {
+                in: [...usernamesInCurrentConvo, signedInUsername],
+              },
             },
           },
         });

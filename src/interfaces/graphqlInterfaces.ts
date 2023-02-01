@@ -33,6 +33,7 @@ export interface CustomSessionInterface {
 // searchUsers query
 export interface SearchUsersQueryArgs {
   username: string;
+  usernamesInCurrentConvo: Array<string> | null;
 }
 export type SearchUsersQueryResponse = Array<SearchedUser>;
 export type SearchedUser = Pick<CustomUserInterface, "id" | "username">;
