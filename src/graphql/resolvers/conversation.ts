@@ -16,6 +16,8 @@ import {
   LeaveConversationMutationResponse,
   MarkConversationAsReadMutationArgs,
   MarkConversationAsReadMutationResponse,
+  UpdateConversationMutationArgs,
+  UpdateConversationMutationResponse,
 } from "../../interfaces/graphqlInterfaces";
 import { userIsConversationParticipant } from "../../util/helpers.js";
 
@@ -249,6 +251,23 @@ const conversationResolvers = {
         };
       } catch (error: any) {
         console.error("leaveConversation resolver error: ", error);
+        throw new GraphQLError(error.message);
+      }
+    },
+    updateConversation: async function (
+      _: any,
+      args: UpdateConversationMutationArgs,
+      context: GraphQLContext
+    ): Promise<UpdateConversationMutationResponse> {
+      console.log("updateConversation resolver: -> args: ", args);
+      try {
+        return {
+          conversationId: args.conversationId,
+          success: true,
+          error: "",
+        };
+      } catch (error: any) {
+        console.error("updateConversation resolver error: ", error);
         throw new GraphQLError(error.message);
       }
     },

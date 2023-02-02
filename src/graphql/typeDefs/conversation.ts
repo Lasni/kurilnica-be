@@ -27,6 +27,16 @@ const conversationTypeDefs = `#graphql
     leaveConversation(conversationId: String!, conversationParticipantsIds: [String]!): LeaveConversationResponse
   }
 
+  type Mutation {
+    updateConversation(conversationId: String!, participantIds: [String]!): UpdateConversationResponse
+  }
+
+  type UpdateConversationResponse {
+    success: Boolean
+    error: String
+    conversationId: String
+  }
+
   type LeaveConversationResponse {
     success: Boolean
     error: String

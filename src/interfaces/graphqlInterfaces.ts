@@ -81,6 +81,17 @@ export interface CreateConversationMutationResponse {
   conversationId?: string;
 }
 
+// updateConversation mutation
+export interface UpdateConversationMutationArgs {
+  conversationId: string;
+  participantIds: Array<string>;
+}
+export interface UpdateConversationMutationResponse {
+  success?: boolean;
+  error?: string;
+  conversationId?: string;
+}
+
 // markConversationAsRead mutation
 export interface MarkConversationAsReadMutationArgs {
   userId: string;
