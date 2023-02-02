@@ -23,10 +23,15 @@ const userResolvers = {
 
       const { username: signedInUsername } = session.user;
 
-      console.log(
-        "searchUsers resolver -> usernamesInCurrentConvo: ",
-        usernamesInCurrentConvo
-      );
+      // console.log(
+      //   "searchUsers resolver -> usernamesInCurrentConvo: ",
+      //   usernamesInCurrentConvo
+      // );
+
+      const usernamesNotForSearch = [
+        ...usernamesInCurrentConvo,
+        signedInUsername,
+      ];
 
       try {
         const users = await prisma.user.findMany({
@@ -34,11 +39,11 @@ const userResolvers = {
             username: {
               contains: searchedUsername,
               // not: signedInUsername,
-              mode: "default",
+              mode: "insensitive",
             },
             NOT: {
               username: {
-                in: [...usernamesInCurrentConvo, signedInUsername],
+                in: usernamesNotForSearch,
               },
             },
           },
