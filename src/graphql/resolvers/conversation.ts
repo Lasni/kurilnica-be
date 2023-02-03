@@ -260,11 +260,44 @@ const conversationResolvers = {
       context: GraphQLContext
     ): Promise<UpdateConversationMutationResponse> {
       console.log("updateConversation resolver: -> args: ", args);
+      const { prisma, pubsub, session } = context;
+      const { conversationId, participantIds } = args;
+
+      const {
+        user: { id: userId },
+      } = session;
+
       try {
+        const updatedConversation = await prisma.conversation.update({
+          where: {
+            id: conversationId,
+          },
+          data: {
+            participants: {
+              createMany: {
+                data: participantIds.map((id) => ({
+                  userId: id,
+                  hasSeenLatestMessage: false,
+                })),
+              },
+            },
+          },
+          include: conversationPopulated,
+        });
+
+        pubsub.publish(ConversationEnum.CONVERSATION_UPDATED, {
+          conversationUpdated: {
+            conversation: updatedConversation,
+            addedUserIds: participantIds,
+          },
+        });
+
+        // console.log("conversation: ", updatedConversation);
+
         return {
-          conversationId: args.conversationId,
           success: true,
           error: "",
+          conversationId: updatedConversation.id,
         };
       } catch (error: any) {
         console.error("updateConversation resolver error: ", error);
@@ -319,27 +352,36 @@ const conversationResolvers = {
             conversationUpdated: {
               conversation: { participants },
               removedUserIds,
+              addedUserIds,
             },
           } = payload;
 
-          const userIsParticipant = userIsConversationParticipant(
-            participants,
-            userId
-          );
+          /**
+           * Removing a user
+           */
+          const userIsBeingRemoved =
+            typeof removedUserIds !== "undefined" && removedUserIds.length > 0;
+          // && Boolean(removedUserIds?.find((id) => id === userId));
+
+          /**
+           * Adding a user
+           */
+          const usersAreBeingAdded =
+            typeof addedUserIds !== "undefined" && addedUserIds.length > 0;
+
+          // const userIsParticipant = userIsConversationParticipant(
+          //   participants,
+          //   userId
+          // );
 
           // const userSentLatestMessage =
           //   payload.conversationUpdated.conversation.latestMessage?.senderId ===
           //   userId;
 
-          const userIsbeingRemoved =
-            typeof removedUserIds !== "undefined" &&
-            removedUserIds.length > 0 &&
-            Boolean(removedUserIds?.find((id) => id === userId));
-
           return (
-            userIsParticipant ||
+            // userIsParticipant ||
             // userSentLatestMessage ||
-            userIsbeingRemoved
+            userIsBeingRemoved || usersAreBeingAdded
           );
         }
       ),

@@ -130,7 +130,8 @@ export interface ConversationCreatedSubscriptionPayload {
 export interface ConversationUpdatedSubscriptionPayload {
   conversationUpdated: {
     conversation: ConversationPopulated;
-    removedUserIds: Array<string>;
+    removedUserIds?: Array<string>;
+    addedUserIds?: Array<string>;
   };
 }
 

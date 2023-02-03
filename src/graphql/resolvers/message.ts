@@ -160,6 +160,7 @@ const messageResolvers = {
           conversationUpdated: {
             conversation: updatedConversation,
             removedUserIds: [],
+            // addedUserIds: []
           },
         });
         return {
