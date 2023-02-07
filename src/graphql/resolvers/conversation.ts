@@ -260,6 +260,15 @@ const conversationResolvers = {
       context: GraphQLContext
     ): Promise<UpdateConversationMutationResponse> {
       console.log("updateConversation resolver: -> args: ", args);
+
+      //! Created test-branch02 where new message updates to conversationItems still works. Will work from here
+      const { prisma, pubsub, session } = context;
+      const { conversationId, participantIds } = args;
+
+      const {
+        user: { id: userId },
+      } = session;
+
       try {
         return {
           conversationId: args.conversationId,
