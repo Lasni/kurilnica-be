@@ -292,8 +292,6 @@ const conversationResolvers = {
           },
         });
 
-        // console.log("conversation: ", updatedConversation);
-
         return {
           success: true,
           error: "",
@@ -369,19 +367,23 @@ const conversationResolvers = {
           const usersAreBeingAdded =
             typeof addedUserIds !== "undefined" && addedUserIds.length > 0;
 
-          // const userIsParticipant = userIsConversationParticipant(
-          //   participants,
-          //   userId
-          // );
+          /**
+           * User is just a conversation participant
+           */
+          const userIsParticipant = userIsConversationParticipant(
+            participants,
+            userId
+          );
 
           // const userSentLatestMessage =
           //   payload.conversationUpdated.conversation.latestMessage?.senderId ===
           //   userId;
 
           return (
-            // userIsParticipant ||
+            userIsParticipant ||
             // userSentLatestMessage ||
-            userIsBeingRemoved || usersAreBeingAdded
+            userIsBeingRemoved ||
+            usersAreBeingAdded
           );
         }
       ),
