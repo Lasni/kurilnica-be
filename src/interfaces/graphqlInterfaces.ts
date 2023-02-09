@@ -131,6 +131,7 @@ export interface ConversationUpdatedSubscriptionPayload {
   conversationUpdated: {
     conversation: ConversationPopulated;
     removedUserIds: Array<string>;
+    addedUserIds: Array<string>;
   };
 }
 

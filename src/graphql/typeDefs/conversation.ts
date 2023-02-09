@@ -79,6 +79,7 @@ const conversationTypeDefs = `#graphql
   type ConversationUpdatedSubscriptionPayload {
     conversation: Conversation
     removedUserIds: [String]
+    addedUserIds: [String]
   }
 
   type Subscription {

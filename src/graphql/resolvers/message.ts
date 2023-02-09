@@ -159,7 +159,8 @@ const messageResolvers = {
         pubsub.publish(ConversationEnum.CONVERSATION_UPDATED, {
           conversationUpdated: {
             conversation: updatedConversation,
-            removedUserIds: [],
+            // removedUserIds: [],
+            // addedUserIds: [],
           },
         });
         return {

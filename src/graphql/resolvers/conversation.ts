@@ -353,8 +353,22 @@ const conversationResolvers = {
             conversationUpdated: {
               conversation: { participants },
               removedUserIds,
+              addedUserIds,
             },
           } = payload;
+
+          /**
+           * Removing a user
+           */
+          const userIsBeingRemoved =
+            typeof removedUserIds !== "undefined" && removedUserIds.length > 0;
+          // && Boolean(removedUserIds?.find((id) => id === userId));
+
+          /**
+           * Adding a user
+           */
+          const usersAreBeingAdded =
+            typeof addedUserIds !== "undefined" && addedUserIds.length > 0;
 
           const userIsParticipant = userIsConversationParticipant(
             participants,
@@ -365,15 +379,11 @@ const conversationResolvers = {
           //   payload.conversationUpdated.conversation.latestMessage?.senderId ===
           //   userId;
 
-          const userIsbeingRemoved =
-            typeof removedUserIds !== "undefined" &&
-            removedUserIds.length > 0 &&
-            Boolean(removedUserIds?.find((id) => id === userId));
-
           return (
             userIsParticipant ||
             // userSentLatestMessage ||
-            userIsbeingRemoved
+            userIsBeingRemoved ||
+            usersAreBeingAdded
           );
         }
       ),
