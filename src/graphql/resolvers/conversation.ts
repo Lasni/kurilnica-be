@@ -259,9 +259,10 @@ const conversationResolvers = {
       args: UpdateConversationMutationArgs,
       context: GraphQLContext
     ): Promise<UpdateConversationMutationResponse> {
-      console.log("updateConversation resolver: -> args: ", args);
+      // console.log("updateConversation resolver: -> args: ", args);
 
       //! Created test-branch02 where new message updates to conversationItems still works. Will work from here
+      // 9.2.23 - adding users to conversation, the changes are reflected in the existing clients, not yet in the client being added
       const { prisma, pubsub, session } = context;
       const { conversationId, participantIds } = args;
 
@@ -270,6 +271,30 @@ const conversationResolvers = {
       } = session;
 
       try {
+        const updatedConversation = await prisma.conversation.update({
+          where: {
+            id: conversationId,
+          },
+          data: {
+            participants: {
+              createMany: {
+                data: participantIds.map((id) => ({
+                  userId: id,
+                  hasSeenLatestMessage: false,
+                })),
+              },
+            },
+          },
+          include: conversationPopulated,
+        });
+
+        pubsub.publish(ConversationEnum.CONVERSATION_UPDATED, {
+          conversationUpdated: {
+            conversation: updatedConversation,
+            addedUserIds: participantIds,
+          },
+        });
+
         return {
           conversationId: args.conversationId,
           success: true,
