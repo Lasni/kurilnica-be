@@ -47,6 +47,15 @@ export interface CreateUsernameMutationResponse {
   error?: string;
 }
 
+// inviteUserToConversation mutation
+export interface InviteUserMutationArgs {
+  userId: string;
+}
+export interface InviteUserMutationResponse {
+  success?: boolean;
+  error?: string;
+}
+
 // custom user
 export interface CustomUserInterface {
   id: string;

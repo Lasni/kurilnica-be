@@ -1,4 +1,11 @@
 import { GraphQLError } from "graphql";
+import { withFilter } from "graphql-subscriptions";
+
+import { UserEnum } from "../../enums/graphqlEnums";
+import {
+  InviteUserMutationArgs,
+  InviteUserMutationResponse,
+} from "../../interfaces/graphqlInterfaces";
 import {
   CreateUsernameMutationArgs,
   CreateUsernameMutationResponse,
@@ -95,6 +102,46 @@ const userResolvers = {
           error: error?.message,
         };
       }
+    },
+    inviteUserToConversation: async function (
+      _: any,
+      args: InviteUserMutationArgs,
+      context: GraphQLContext
+    ): Promise<InviteUserMutationResponse> {
+      const { userId: invitedUserId } = args;
+      const { prisma, session, pubsub } = context;
+
+      if (!session?.user) {
+        return {
+          error: "Not authorized",
+        };
+      }
+      const { id: invitingUserId } = session.user;
+
+      console.log(
+        `invitingUserId: ${invitingUserId} --> invitedUserId: ${invitedUserId}`
+      );
+      pubsub.publish(UserEnum.USER_INVITED_TO_CONVERSATION, {
+        invitedUserId,
+        invitingUserId,
+      });
+      return { success: true, error: "" };
+    },
+  },
+  Subscription: {
+    userInvitedToConversation: {
+      subscribe: withFilter(
+        (_: any, __: any, context: GraphQLContext) => {
+          const { pubsub } = context;
+          return pubsub.asyncIterator([UserEnum.USER_INVITED_TO_CONVERSATION]);
+        },
+        (payload: any, variables: any, context: GraphQLContext) => {
+          console.log("payload", payload);
+          console.log("variables", variables);
+          // console.log("context", context);
+          return true;
+        }
+      ),
     },
   },
 };

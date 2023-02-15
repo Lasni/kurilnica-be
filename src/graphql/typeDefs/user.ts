@@ -29,6 +29,19 @@ const userTypeDefs = `#graphql
     success: Boolean
     error: String
   }
+
+  type Mutation {
+    inviteUserToConversation(userId: String): InviteUserResponse
+  }
+
+  type InviteUserResponse {
+    success: Boolean
+    error: String
+  }
+
+  type Subscription {
+    userInvitedToConversation(invitingUserId: String, invitedUserId: String): Boolean
+  }
 `;
 
 export default userTypeDefs;

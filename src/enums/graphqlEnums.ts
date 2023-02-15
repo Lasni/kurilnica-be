@@ -6,3 +6,7 @@ export const enum ConversationEnum {
 export const enum MessageEnum {
   MESSAGE_SENT = "MESSAGE_SENT",
 }
+
+export const enum UserEnum {
+  USER_INVITED_TO_CONVERSATION = "USER_INVITED_TO_CONVERSATION",
+}
