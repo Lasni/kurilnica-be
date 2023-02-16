@@ -54,6 +54,7 @@ export interface InviteUserMutationArgs {
 export interface InviteUserMutationResponse {
   success?: boolean;
   error?: string;
+  userId?: string;
 }
 
 // custom user

@@ -259,7 +259,7 @@ const conversationResolvers = {
       args: UpdateConversationMutationArgs,
       context: GraphQLContext
     ): Promise<UpdateConversationMutationResponse> {
-      console.log("updateConversation resolver: -> args: ", args);
+      // console.log("updateConversation resolver: -> args: ", args);
       const { prisma, pubsub, session } = context;
       const { conversationId, participantIds } = args;
 

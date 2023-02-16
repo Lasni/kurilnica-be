@@ -118,14 +118,14 @@ const userResolvers = {
       }
       const { id: invitingUserId } = session.user;
 
-      console.log(
-        `invitingUserId: ${invitingUserId} --> invitedUserId: ${invitedUserId}`
-      );
+      // console.log(
+      //   `invitingUserId: ${invitingUserId} --> invitedUserId: ${invitedUserId}`
+      // );
       pubsub.publish(UserEnum.USER_INVITED_TO_CONVERSATION, {
         invitedUserId,
         invitingUserId,
       });
-      return { success: true, error: "" };
+      return { success: true, error: "", userId: invitedUserId };
     },
   },
   Subscription: {
@@ -133,13 +133,21 @@ const userResolvers = {
       subscribe: withFilter(
         (_: any, __: any, context: GraphQLContext) => {
           const { pubsub } = context;
+
           return pubsub.asyncIterator([UserEnum.USER_INVITED_TO_CONVERSATION]);
         },
         (payload: any, variables: any, context: GraphQLContext) => {
-          console.log("payload", payload);
-          console.log("variables", variables);
+          const { session } = context;
+          // console.log(
+          //   "userInvitedToConversation subscription payload",
+          //   payload
+          // );
+          // console.log(
+          //   "userInvitedToConversation subscription variables",
+          //   variables
+          // );
           // console.log("context", context);
-          return true;
+          return payload.invitedUserId === session.user.id;
         }
       ),
     },

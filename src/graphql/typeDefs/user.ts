@@ -31,16 +31,23 @@ const userTypeDefs = `#graphql
   }
 
   type Mutation {
-    inviteUserToConversation(userId: String): InviteUserResponse
+    inviteUserToConversation(userId: String): InviteUserToConversationResponse
   }
 
-  type InviteUserResponse {
+  type InviteUserToConversationResponse {
     success: Boolean
     error: String
+    userId: String
   }
 
   type Subscription {
-    userInvitedToConversation(invitingUserId: String, invitedUserId: String): Boolean
+    userInvitedToConversation(invitingUserId: String, invitedUserId: String): UserInvitedToConversationSubscriptionResponse
+  }
+
+  type UserInvitedToConversationSubscriptionResponse {
+    success: Boolean
+    error: String
+    userId: String
   }
 `;
 
