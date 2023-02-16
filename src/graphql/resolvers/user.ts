@@ -122,8 +122,10 @@ const userResolvers = {
       //   `invitingUserId: ${invitingUserId} --> invitedUserId: ${invitedUserId}`
       // );
       pubsub.publish(UserEnum.USER_INVITED_TO_CONVERSATION, {
-        invitedUserId,
-        invitingUserId,
+        userInvitedToConversation: {
+          invitedUserId,
+          invitingUserId,
+        },
       });
       return { success: true, error: "", userId: invitedUserId };
     },
@@ -147,7 +149,9 @@ const userResolvers = {
           //   variables
           // );
           // console.log("context", context);
-          return payload.invitedUserId === session.user.id;
+          return (
+            payload.userInvitedToConversation.invitedUserId === session.user.id
+          );
         }
       ),
     },

@@ -45,9 +45,11 @@ const userTypeDefs = `#graphql
   }
 
   type UserInvitedToConversationSubscriptionResponse {
-    success: Boolean
-    error: String
-    userId: String
+    invitedUserId: String
+    invitingUserId: String
+    # success: Boolean
+    # error: String
+    # userId: String
   }
 `;
 
