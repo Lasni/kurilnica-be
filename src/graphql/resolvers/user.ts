@@ -125,6 +125,7 @@ const userResolvers = {
         userInvitedToConversation: {
           invitedUserId,
           invitingUserId,
+          invitingUserUsername: session.user.username,
         },
       });
       return { success: true, error: "", userId: invitedUserId };

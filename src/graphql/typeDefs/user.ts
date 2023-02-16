@@ -47,6 +47,7 @@ const userTypeDefs = `#graphql
   type UserInvitedToConversationSubscriptionResponse {
     invitedUserId: String
     invitingUserId: String
+    invitingUserUsername: String
     # success: Boolean
     # error: String
     # userId: String
