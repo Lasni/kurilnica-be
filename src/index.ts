@@ -20,8 +20,6 @@ import {
   SubscriptionContextInterface,
 } from "./interfaces/graphqlInterfaces";
 
-//! Created branch temp01 because basic messaging was breaking after implementing 'mark conversations as read' functionality
-
 const { json } = pkg;
 dotenv.config();
 

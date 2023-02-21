@@ -108,8 +108,11 @@ const userResolvers = {
       args: InviteUserMutationArgs,
       context: GraphQLContext
     ): Promise<InviteUserMutationResponse> {
-      const { userId: invitedUserId } = args;
+      const { userId: invitedUserId, conversationId } = args;
       const { prisma, session, pubsub } = context;
+
+      // console.log("editingConversation: ", editingConversation);
+      // console.log("args", args);
 
       if (!session?.user) {
         return {
@@ -117,6 +120,7 @@ const userResolvers = {
         };
       }
       const { id: invitingUserId } = session.user;
+      console.log("conversationId (resolver):", conversationId);
 
       // console.log(
       //   `invitingUserId: ${invitingUserId} --> invitedUserId: ${invitedUserId}`
@@ -126,10 +130,24 @@ const userResolvers = {
           invitedUserId,
           invitingUserId,
           invitingUserUsername: session.user.username,
+          conversationId: conversationId,
         },
       });
-      return { success: true, error: "", userId: invitedUserId };
+      return {
+        success: true,
+        error: "",
+        userId: invitedUserId,
+        conversationId: conversationId,
+      };
     },
+    // respondToConversationInvitation: async function (
+    //   _: any,
+    //   args: RespondToConversationInvitationMutationArgs,
+    //   context: GraphQLContext
+    // ): RespondToConversationInvitationMutationResponse {
+    //   const {accept} = args
+
+    // }
   },
   Subscription: {
     userInvitedToConversation: {
@@ -141,15 +159,7 @@ const userResolvers = {
         },
         (payload: any, variables: any, context: GraphQLContext) => {
           const { session } = context;
-          // console.log(
-          //   "userInvitedToConversation subscription payload",
-          //   payload
-          // );
-          // console.log(
-          //   "userInvitedToConversation subscription variables",
-          //   variables
-          // );
-          // console.log("context", context);
+
           return (
             payload.userInvitedToConversation.invitedUserId === session.user.id
           );

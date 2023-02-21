@@ -50,12 +50,47 @@ export interface CreateUsernameMutationResponse {
 // inviteUserToConversation mutation
 export interface InviteUserMutationArgs {
   userId: string;
+  conversationId: string;
+  // editingConversation: EditingConversation;
+  // editingConversation: ConversationPopulated;
 }
+
+// export interface EditingConversation {
+//   id: string;
+//   // participants: Array<Participant>;
+//   updatedAt: Date;
+//   latestMessage: LatestMessage | null;
+// }
+
+// export interface Participant {
+//   user: User;
+//   hasSeenLatestMessage: boolean;
+// }
+
+// export interface User {
+//   id: string;
+//   username: string | null;
+// }
+// export interface LatestMessage {
+//   // sender?: Sender;
+//   body: string;
+//   createdAt: Date;
+//   id: string;
+// }
+// export interface Sender {
+//   id: string;
+//   username: string | null;
+// }
 export interface InviteUserMutationResponse {
   success?: boolean;
   error?: string;
   userId?: string;
+  conversationId?: string;
+  // editingConversation?: EditingConversation;
 }
+
+// respondToConversationInvitation mutation
+export interface RespondToConversationInvitationMutationArgs {}
 
 // custom user
 export interface CustomUserInterface {
