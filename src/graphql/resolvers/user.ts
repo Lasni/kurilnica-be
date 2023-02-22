@@ -30,11 +30,6 @@ const userResolvers = {
 
       const { username: signedInUsername } = session.user;
 
-      // console.log(
-      //   "searchUsers resolver -> usernamesInCurrentConvo: ",
-      //   usernamesInCurrentConvo
-      // );
-
       const usernamesNotForSearch = [
         ...usernamesInCurrentConvo,
         signedInUsername,
@@ -111,20 +106,13 @@ const userResolvers = {
       const { userId: invitedUserId, conversationId } = args;
       const { prisma, session, pubsub } = context;
 
-      // console.log("editingConversation: ", editingConversation);
-      // console.log("args", args);
-
       if (!session?.user) {
         return {
           error: "Not authorized",
         };
       }
       const { id: invitingUserId } = session.user;
-      console.log("conversationId (resolver):", conversationId);
 
-      // console.log(
-      //   `invitingUserId: ${invitingUserId} --> invitedUserId: ${invitedUserId}`
-      // );
       pubsub.publish(UserEnum.USER_INVITED_TO_CONVERSATION, {
         userInvitedToConversation: {
           invitedUserId,
