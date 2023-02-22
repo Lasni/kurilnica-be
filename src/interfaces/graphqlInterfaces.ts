@@ -47,9 +47,9 @@ export interface CreateUsernameMutationResponse {
   error?: string;
 }
 
-// inviteUserToConversation mutation
-export interface InviteUserMutationArgs {
-  userId: string;
+// inviteUsersToConversation mutation
+export interface InviteUsersMutationArgs {
+  usersIds: Array<string>;
   conversationId: string;
   // editingConversation: EditingConversation;
   // editingConversation: ConversationPopulated;
@@ -81,10 +81,10 @@ export interface InviteUserMutationArgs {
 //   id: string;
 //   username: string | null;
 // }
-export interface InviteUserMutationResponse {
+export interface InviteUsersMutationResponse {
   success?: boolean;
   error?: string;
-  userId?: string;
+  usersIds?: Array<string>;
   conversationId?: string;
   // editingConversation?: EditingConversation;
 }

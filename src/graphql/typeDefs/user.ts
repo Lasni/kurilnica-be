@@ -51,13 +51,13 @@ const userTypeDefs = `#graphql
   
 
   type Mutation {
-    inviteUserToConversation(userId: String conversationId: String): InviteUserToConversationResponse
+    inviteUsersToConversation(usersIds: [String] conversationId: String): InviteUserToConversationResponse
   }
 
   type InviteUserToConversationResponse {
     success: Boolean
     error: String
-    userId: String
+    usersIds: [String]
     conversationId: String
   }
 

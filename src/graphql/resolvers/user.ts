@@ -3,8 +3,8 @@ import { withFilter } from "graphql-subscriptions";
 
 import { UserEnum } from "../../enums/graphqlEnums";
 import {
-  InviteUserMutationArgs,
-  InviteUserMutationResponse,
+  InviteUsersMutationArgs,
+  InviteUsersMutationResponse,
 } from "../../interfaces/graphqlInterfaces";
 import {
   CreateUsernameMutationArgs,
@@ -98,12 +98,12 @@ const userResolvers = {
         };
       }
     },
-    inviteUserToConversation: async function (
+    inviteUsersToConversation: async function (
       _: any,
-      args: InviteUserMutationArgs,
+      args: InviteUsersMutationArgs,
       context: GraphQLContext
-    ): Promise<InviteUserMutationResponse> {
-      const { userId: invitedUserId, conversationId } = args;
+    ): Promise<InviteUsersMutationResponse> {
+      const { usersIds: invitedUsersIds, conversationId } = args;
       const { prisma, session, pubsub } = context;
 
       if (!session?.user) {
@@ -115,7 +115,7 @@ const userResolvers = {
 
       pubsub.publish(UserEnum.USER_INVITED_TO_CONVERSATION, {
         userInvitedToConversation: {
-          invitedUserId,
+          invitedUsersIds,
           invitingUserId,
           invitingUserUsername: session.user.username,
           conversationId: conversationId,
@@ -124,7 +124,7 @@ const userResolvers = {
       return {
         success: true,
         error: "",
-        userId: invitedUserId,
+        usersIds: invitedUsersIds,
         conversationId: conversationId,
       };
     },
