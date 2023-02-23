@@ -5,6 +5,7 @@ import { UserEnum } from "../../enums/graphqlEnums";
 import {
   InviteUsersMutationArgs,
   InviteUsersMutationResponse,
+  UserInvitedToConversationSubscriptionPayload,
 } from "../../interfaces/graphqlInterfaces";
 import {
   CreateUsernameMutationArgs,
@@ -105,6 +106,8 @@ const userResolvers = {
     ): Promise<InviteUsersMutationResponse> {
       const { usersIds: invitedUsersIds, conversationId } = args;
       const { prisma, session, pubsub } = context;
+      // console.log("invitedUsersIds: ", invitedUsersIds);
+      // console.log("conversationId: ", conversationId);
 
       if (!session?.user) {
         return {
@@ -145,11 +148,17 @@ const userResolvers = {
 
           return pubsub.asyncIterator([UserEnum.USER_INVITED_TO_CONVERSATION]);
         },
-        (payload: any, variables: any, context: GraphQLContext) => {
+        (
+          payload: UserInvitedToConversationSubscriptionPayload,
+          variables: any,
+          context: GraphQLContext
+        ) => {
           const { session } = context;
 
-          return (
-            payload.userInvitedToConversation.invitedUserId === session.user.id
+          console.log("payload: ", payload);
+
+          return payload.userInvitedToConversation.invitedUsersIds.includes(
+            session.user.id
           );
         }
       ),

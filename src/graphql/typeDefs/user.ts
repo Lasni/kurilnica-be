@@ -92,11 +92,11 @@ const userTypeDefs = `#graphql
   # }
 
   type Subscription {
-    userInvitedToConversation(invitingUserId: String, invitedUserId: String, conversationId: String): UserInvitedToConversationSubscriptionResponse
+    userInvitedToConversation(invitingUserId: String, invitedUsersIds: [String], conversationId: String): UserInvitedToConversationSubscriptionResponse
   }
 
   type UserInvitedToConversationSubscriptionResponse {
-    invitedUserId: String
+    invitedUsersIds: [String]
     invitingUserId: String
     invitingUserUsername: String
     conversationId: String

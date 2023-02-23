@@ -89,6 +89,15 @@ export interface InviteUsersMutationResponse {
   // editingConversation?: EditingConversation;
 }
 
+export interface UserInvitedToConversationSubscriptionPayload {
+  userInvitedToConversation: {
+    invitedUsersIds: Array<string>;
+    invitingUserId: string;
+    invitingUserUsername: string;
+    conversationId: string;
+  };
+}
+
 // respondToConversationInvitation mutation
 export interface RespondToConversationInvitationMutationArgs {}
 
