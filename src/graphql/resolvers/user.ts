@@ -155,7 +155,7 @@ const userResolvers = {
         ) => {
           const { session } = context;
 
-          console.log("payload: ", payload);
+          // console.log("payload: ", payload);
 
           return payload.userInvitedToConversation.invitedUsersIds.includes(
             session.user.id

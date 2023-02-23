@@ -254,6 +254,7 @@ const conversationResolvers = {
         throw new GraphQLError(error.message);
       }
     },
+    // vrstni red: chromium, chrome -> no error
     updateConversation: async function (
       _: any,
       args: UpdateConversationMutationArgs,
@@ -261,6 +262,10 @@ const conversationResolvers = {
     ): Promise<UpdateConversationMutationResponse> {
       const { prisma, pubsub, session } = context;
       const { conversationId, participantIds } = args;
+
+      console.log("updateConversation participantIds: ", participantIds);
+
+      // let unique = [...new Set(participantIds)];
 
       const {
         user: { id: userId },
