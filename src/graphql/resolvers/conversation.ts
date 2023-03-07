@@ -278,6 +278,11 @@ const conversationResolvers = {
           },
           data: {
             participants: {
+              // create: {
+              //   userId: participantIds[0],
+              //   hasSeenLatestMessage: false,
+              // },
+              //!
               createMany: {
                 data: participantIds.map((id) => ({
                   userId: id,
